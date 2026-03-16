@@ -1,1 +1,0 @@
-WORD2VEC Files - https://drive.google.com/file/d/1Q0GaGTHCgMI9rUgE8hsGDQafiJdZuvw2/view?usp=share_link
