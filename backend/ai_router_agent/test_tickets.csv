@@ -1,0 +1,19 @@
+ticket_id,ticket_text,expected_intent
+T001,"How do I connect to the company VPN from my Mac?",FAQ
+T002,"Where can I find the IT security policy document?",FAQ
+T003,"What are the steps to set up two-factor authentication?",FAQ
+T004,"How do I configure Outlook to use my corporate email?",FAQ
+T005,"Can you tell me the process to request a new software license?",FAQ
+T006,"Please reset my Active Directory password.",Action
+T007,"Unlock my account — it got locked after too many login attempts.",Action
+T008,"Grant me read access to the shared marketing drive on SharePoint.",Action
+T009,"Add me to the engineering-team Slack channel.",Action
+T010,"Revoke VPN access for employee ID 4892 — they left the company.",Action
+T011,"Create a new service account for the CI/CD pipeline.",Action
+T012,"The production database server has been crashing every 10 minutes since 3 AM.",Complex
+T013,"My laptop screen is flickering and there is a burning smell coming from the chassis.",Complex
+T014,"Our entire office network went down and no one on the second floor can connect.",Complex
+T015,"The ERP system is throwing a critical unhandled exception during month-end payroll processing.",Complex
+T016,"Help",Complex
+T017,"Error",Complex
+T018,"Multiple users are reporting intermittent SSO failures after the latest IdP update.",Complex
