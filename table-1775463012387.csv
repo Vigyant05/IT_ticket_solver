@@ -1,0 +1,9 @@
+﻿Action Category,Count,%,Description
+**Hardware Allocation**,"6,985",41.3%,"PO processing, device allocation, laptop/monitor requests"
+**Access Requests**,"5,119",30.3%,"Folder permissions, system access, repository rights"
+**Oracle/Fusion**,"3,223",19.1%,"Timecards, project codes, expense reports, forecasting"
+**Network Config**,"3,337",19.7%,"VPN, ports, firewall, tunneling"
+**Software/Licenses**,"2,694",15.9%,"Visual Studio, tool installations, subscriptions"
+**System Maintenance**,"2,532",15.0%,"Upgrades, backups, patches, server maintenance"
+**User Management**,"1,558",9.2%,"New starters, leavers, AD accounts, transfers"
+**Password/Security**,865,5.1%,"Password resets, account unlocks"
