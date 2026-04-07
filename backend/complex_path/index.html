@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI IT Support Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        h1, h2 { font-family: 'Outfit', sans-serif; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+        }
+
+        .header {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { background: #7dd3fc; transform: translateY(-2px); }
+
+        .ticket-list { display: flex; flex-direction: column; gap: 1rem; }
+        .ticket-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .severity-5 { background: var(--danger); }
+        .severity-4 { background: #f97316; }
+        .severity-3 { background: var(--warning); }
+        .severity-2 { background: var(--success); }
+        .severity-1 { background: var(--text-muted); }
+
+        .agent-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .load-indicator {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .load-bar { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+
+        #ticketModal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 500px; z-index: 1000; display: none;
+        }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); display: none;
+        }
+
+        input, textarea {
+            width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0 1rem;
+        }
+
+        .analysis-box {
+            font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>IT Command Center <span style="color: var(--accent)">| Routing AI</span></h1>
+        <button class="btn" onclick="openModal()">New Ticket</button>
+    </div>
+
+    <div class="card">
+        <h2>Active Tickets</h2>
+        <div id="ticketContainer" class="ticket-list">
+            <!-- Tickets will appear here -->
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Agent Workload</h2>
+        <div id="agentContainer">
+            <!-- Agents will appear here -->
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="card" id="ticketModal">
+        <h2>Submit Support Ticket</h2>
+        <input type="text" id="ticketTitle" placeholder="Short summary of issue">
+        <textarea id="ticketDesc" rows="4" placeholder="Describe the problem in detail..."></textarea>
+        <button class="btn" onclick="submitTicket()" style="width: 100%">Analyze & Route</button>
+        <button class="btn" onclick="closeModal()" style="width: 100%; background: transparent; color: white; margin-top: 0.5rem;">Cancel</button>
+    </div>
+
+    <script>
+        const API_URL = ""; // Relative since served by FastAPI
+
+        async function fetchAgents() {
+            const res = await fetch(`${API_URL}/employees`);
+            const agents = await res.json();
+            const container = document.getElementById('agentContainer');
+            container.innerHTML = agents.sort((a,b) => b.current_load - a.current_load).map(agent => `
+                <div class="agent-item">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem;">${agent.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted)">${agent.team} | ${agent.expertise_tags.slice(0,2).join(', ')}</div>
+                        <div class="load-indicator">
+                            <div class="load-bar" style="width: ${agent.current_load * 10}%"></div>
+                        </div>
+                    </div>
+                    <div style="font-weight: 800; color: ${agent.current_load > 5 ? 'var(--danger)' : 'var(--accent)'}">${agent.current_load} pts</div>
+                </div>
+            `).join('');
+        }
+
+        async function fetchTickets() {
+            const res = await fetch(`${API_URL}/tickets`);
+            const tickets = await res.json();
+            const container = document.getElementById('ticketContainer');
+            // Sort by ID descending (newest first) instead of just reversing
+            const sortedTickets = tickets.sort((a,b) => b.id - a.id);
+            container.innerHTML = sortedTickets.map(t => `
+                <div class="ticket-item" style="border-left-color: ${t.severity >= 4 ? 'var(--danger)' : (t.severity >= 3 ? 'var(--warning)' : 'var(--accent)')}">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <h3 style="margin: 0; font-size: 1rem;">${t.title}</h3>
+                        <span class="badge severity-${t.severity || 1}">S${t.severity || 1} | P${(t.priority_score || 0).toFixed(1)}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin: 0.5rem 0;">${t.description}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <span style="font-size: 0.75rem; background: rgba(56, 189, 248, 0.1); color: var(--accent); padding: 4px 8px; border-radius: 4px;">
+                            ${t.category} > ${t.subcategory}
+                        </span>
+                        <span style="font-size: 0.8rem; font-weight: 700;">Assigned: ${t.assigned_agent_name}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal() {
+            document.getElementById('ticketModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('ticketModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        async function submitTicket() {
+            const title = document.getElementById('ticketTitle').value;
+            const description = document.getElementById('ticketDesc').value;
+
+            if (!title || !description) return alert("Fill all fields");
+
+            const btn = document.querySelector('#ticketModal .btn');
+            btn.innerText = "Analyzing with Gemini...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/tickets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description })
+                });
+
+                const data = await res.json();
+                console.log(data);
+                closeModal();
+                fetchTickets();
+                fetchAgents();
+            } catch (err) {
+                console.error(err);
+                alert(`Error connecting to backend: ${err.message}. Ensure uvicorn is running on port 8000!`);
+            } finally {
+                btn.innerText = "Analyze & Route";
+                btn.disabled = false;
+            }
+        }
+
+        // Initial Load
+        fetchAgents();
+        fetchTickets();
+        setInterval(() => { fetchAgents(); fetchTickets(); }, 15000);
+    </script>
+</body>
+</html>
