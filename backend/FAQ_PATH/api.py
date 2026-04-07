@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from .rag import retrieve_docs, generate_answer
-from .embed import model
-from .db import get_collection
+from rag import retrieve_docs, generate_answer
+from embed import model
+from db import get_collection
 
 # Initialize FastAPI app
 app = FastAPI(title="IT FAQ RAG API")

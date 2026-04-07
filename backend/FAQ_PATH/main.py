@@ -1,9 +1,9 @@
 from pathlib import Path
-from src.ingest import load_multiple_datasets, create_chunks
-from src.embed import generate_embeddings
-from src.db import store_embeddings
+from ingest import load_multiple_datasets, create_chunks
+from embed import generate_embeddings
+from db import store_embeddings
 
-DATA_DIR = Path(__file__).parent.parent / "data"
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "dataset" / "RAG_data"
 
 def run_pipeline():
     print("🚀 Starting pipeline...")

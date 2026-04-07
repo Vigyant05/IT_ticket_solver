@@ -1,5 +1,5 @@
-from .embed import model
-from .db import get_collection
+from embed import model
+from db import get_collection
 from google import genai
 import os
 
