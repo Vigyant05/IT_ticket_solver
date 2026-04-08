@@ -1,0 +1,22 @@
+[
+    {
+        "issue": "VPN Connection Failure - Error 800",
+        "resolution": "Check if the user is using the correct server address. Ensure the firewall is not blocking GRE protocol (port 47) or TCP port 1723. Restart the 'Routing and Remote Access' service on the server if necessary."
+    },
+    {
+        "issue": "Password Reset for Active Directory",
+        "resolution": "Verify the user's identity. Open AD Users and Computers. Right-click the user and select 'Reset Password'. Check 'Exclude from password complexity' if the user is a contractor (follow SOP 12B)."
+    },
+    {
+        "issue": "Production Server CPU Spike",
+        "resolution": "Identify the process using 'top' or 'htop'. If it's a Java process, check the garbage collection logs. If it's a web server, check access_log for a DDoS pattern. Scale up the instance if the load is legitimate."
+    },
+    {
+        "issue": "Outlook Not Syncing",
+        "resolution": "Close Outlook. Go to Control Panel > Mail > Profiles. Create a new profile and re-add the user's Exchange account. This forces a re-sync of the .ost file."
+    },
+    {
+        "issue": "Kubernetes Pod CrashLoopBackOff",
+        "resolution": "Check logs with 'kubectl logs [pod_name]'. Check events with 'kubectl describe pod [pod_name]'. Common causes are missing environment variables, liveness probe failure, or insufficient memory (OOMKilled)."
+    }
+]
