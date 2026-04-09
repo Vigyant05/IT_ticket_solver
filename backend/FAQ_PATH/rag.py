@@ -10,7 +10,7 @@ GEMINI_MODEL = "gemini-3-flash-preview"
 collection = get_collection()
 
 
-# 🔹 Step 1: Retrieve relevant documents
+# Step 1: Retrieve relevant documents
 def retrieve_docs(query, top_k=3):
     query_embedding = model.encode([query])[0]
 
@@ -23,7 +23,7 @@ def retrieve_docs(query, top_k=3):
     return docs
 
 
-# 🔹 Step 2: Generate answer using LLM
+# Step 2: Generate answer using LLM
 def generate_answer(query, docs):
     context = "\n".join(docs)
 
@@ -49,7 +49,7 @@ Answer clearly and concisely:
     return response.text
 
 
-# 🔹 Combined function (optional)
+# Combined function (optional)
 def rag_pipeline(query):
     docs = retrieve_docs(query)
     answer = generate_answer(query, docs)

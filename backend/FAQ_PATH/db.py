@@ -30,9 +30,9 @@ def store_embeddings(chunks, embeddings):
             ids=batch_ids
         )
         ids.extend(batch_ids)
-        print(f"✅ Stored {end_idx}/{total} documents")
+        print(f"Stored {end_idx}/{total} documents")
 
-    print(f"✅ Successfully stored {len(ids)} new documents in total.")
+    print(f"Successfully stored {len(ids)} new documents in total.")
 
 
 def get_collection():

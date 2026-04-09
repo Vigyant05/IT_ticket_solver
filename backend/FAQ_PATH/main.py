@@ -6,7 +6,7 @@ from db import store_embeddings
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "dataset" / "RAG_data"
 
 def run_pipeline():
-    print("🚀 Starting pipeline...")
+    print("Starting pipeline...")
 
     file_paths = [
         str(DATA_DIR / "aa_dataset-tickets-english-only.csv"),
@@ -14,21 +14,21 @@ def run_pipeline():
         str(DATA_DIR / "synthetic_it_support_tickets.csv"),
     ]
 
-    print("📂 Loading datasets...")
+    print("Loading datasets...")
     df = load_multiple_datasets(file_paths)
 
-    print(f"✅ Total records loaded: {len(df)}")
+    print(f"Total records loaded: {len(df)}")
 
-    print("✂️ Creating chunks...")
+    print("Creating chunks...")
     chunks = create_chunks(df)
 
-    print("🔢 Generating embeddings...")
+    print("Generating embeddings...")
     embeddings = generate_embeddings(chunks)
 
-    print("💾 Storing in DB...")
+    print("Storing in DB...")
     store_embeddings(chunks, embeddings)
 
-    print("✅ DONE!")
+    print("DONE!")
 
 
 if __name__ == "__main__":

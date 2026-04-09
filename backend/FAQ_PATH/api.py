@@ -13,7 +13,7 @@ collection = get_collection()
 
 
 # -------------------------------
-# 🔹 Request Models
+# Request Models
 # -------------------------------
 class QueryRequest(BaseModel):
     query: str
@@ -24,15 +24,15 @@ class AddDataRequest(BaseModel):
 
 
 # -------------------------------
-# 🔹 Health Check
+# Health Check
 # -------------------------------
 @app.get("/")
 def root():
-    return {"message": "✅ IT FAQ RAG API is running"}
+    return {"message": "IT FAQ RAG API is running"}
 
 
 # -------------------------------
-# 🔹 Ask Question (RAG)
+# Ask Question (RAG)
 # -------------------------------
 @app.post("/ask")
 def ask_question(request: QueryRequest):
@@ -52,7 +52,7 @@ def ask_question(request: QueryRequest):
 
 
 # -------------------------------
-# 🔹 Add New Data (REAL-TIME DB UPDATE)
+# Add New Data (REAL-TIME DB UPDATE)
 # -------------------------------
 @app.post("/add")
 def add_data(request: AddDataRequest):
@@ -72,14 +72,14 @@ def add_data(request: AddDataRequest):
     )
 
     return {
-        "message": "✅ Data added successfully",
+        "message": "Data added successfully",
         "id": new_id,
         "text": text
     }
 
 
 # -------------------------------
-# 🔹 View Stored Data (Optional Debug)
+# View Stored Data (Optional Debug)
 # -------------------------------
 @app.get("/view")
 def view_data(limit: int = 100):
