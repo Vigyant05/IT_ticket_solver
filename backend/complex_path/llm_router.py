@@ -16,7 +16,7 @@ def get_best_model():
     try:
         available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         # Prefer flash for speed, then pro
-        for preferred in ['gemini-3-flash-preview', 'gemini-1.5-pro', 'gemini-pro']:
+        for preferred in ['gemini-3-flash', 'gemini-1.5-pro', 'gemini-pro']:
             for model_name in available:
                 if preferred in model_name:
                     return model_name

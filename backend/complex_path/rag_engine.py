@@ -10,7 +10,7 @@ load_dotenv()
 # Configure Gemini
 API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3-flash-preview')
+model = genai.GenerativeModel('gemini-3-flash')
 
 class RAGService:
     def __init__(self, kb_path: str = "knowledge_base.json"):
