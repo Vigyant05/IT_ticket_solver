@@ -1,0 +1,54 @@
+{
+  "rag": {
+    "cols": [
+      "snippet",
+      "recommendation"
+    ],
+    "data": [
+      {
+        "snippet": "User: Hi, I'm trying to access my account but keep getting an error message. What should I do?\nAgent: I'm sorry to hear that. Could you please tell me what the error message says exactly?\nUser: It says \"Error 404: Page not found\" and I've tried accessing it multiple times.\nAgent: Okay, I understand. Have you tried clearing your browser cache and cookies?\nUser: Yes, I did that already. It didn't help.\nAgent: Thank you for the information. Let me check our end to see if there are any issues. In the meantime, could you try using a different web browser or device?\nUser: I tried Chrome and Firefox, and also on my phone, but same error.\nAgent: I see. I've confirmed that the page is currently available on our end. Let me guide you through resetting your account password. Could you please send me your registered email address so I can send a password reset link?\nUser: Sure, my email is user@example.com.\nAgent: I've sent the password reset link to your email. Please check your inbox and follow the link to reset your password. Once you're logged in, you should be able to access your account. If you continue to face issues after resetting your password, please let me know the exact error message again, and I'll look into it further.",
+        "recommendation": "Write a concise summary of the conversation above. Focus on the key points exchanged between the user and agent.\n\nKey points from the conversation:\n- The user is experiencing an \"Error 404: Page not found\" when trying to access their account.\n- The agent suggested clearing browser cache and cookies, but the user indicated that didn't resolve the issue.\n- The user has tried multiple browsers (Chrome, Firefox) and devices, but the error persists.\n- The agent confirmed that the page is available on their end.\n- The agent offered to reset the user's password via email and instructed the user to check their inbox for the reset link.\n- The user provided their email address, and the agent sent the reset link.\n- If the issue persists after password reset, the user is advised to report the error again.\n\nSummary:\nThe user is unable to access their account due to an \"Error 404: Page not found.\" Basic troubleshooting (clearing cache, trying different browsers/devices) was unsuccessful. The agent has sent a password reset link to the user's email and advised them to try logging in again with the new password. If the issue continues after password reset, further investigation will be needed."
+      }
+    ]
+  },
+  "aa": {
+    "cols": [
+      "subject",
+      "body",
+      "answer",
+      "type",
+      "queue",
+      "priority",
+      "language",
+      "version",
+      "tag_1",
+      "tag_2",
+      "tag_3",
+      "tag_4",
+      "tag_5",
+      "tag_6",
+      "tag_7",
+      "tag_8"
+    ],
+    "data": [
+      {
+        "subject": "Account Disruption",
+        "body": "Dear Customer Support Team,\\n\\nI am writing to report a significant problem with the centralized account management portal, which currently appears to be offline. This outage is blocking access to account settings, leading to substantial inconvenience. I have attempted to log in multiple times using different browsers and devices, but the issue persists.\\n\\nCould you please provide an update on the outage status and an estimated time for resolution? Also, are there any alternative ways to access and manage my account during this downtime?",
+        "answer": "Thank you for reaching out, <name>. We are aware of the outage affecting the centralized account management system, and our technical team is actively working to resolve the issue. In the meantime, we suggest using alternative methods to manage your account, with a focus on restoring service as quickly as possible. We will provide an update as soon as the service is back online. We apologize for the inconvenience and appreciate your patience. If you have any further questions, please let us know.",
+        "type": "Incident",
+        "queue": "Technical Support",
+        "priority": "high",
+        "language": "en",
+        "version": 51,
+        "tag_1": "Account",
+        "tag_2": "Disruption",
+        "tag_3": "Outage",
+        "tag_4": "IT",
+        "tag_5": "Tech Support",
+        "tag_6": null,
+        "tag_7": null,
+        "tag_8": null
+      }
+    ]
+  }
+}
