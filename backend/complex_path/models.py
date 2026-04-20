@@ -9,6 +9,7 @@ class Employee(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
+    password = Column(String, default="12345")
     role = Column(String)
     team = Column(String, nullable=False) # L1, L2, L3, DevOps, Security
     expertise_tags = Column(JSON) # e.g., ["docker", "kubernetes", "windows"]

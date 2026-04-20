@@ -5,7 +5,7 @@ Prints retrieved context + generated answer for analysis.
 import pandas as pd
 import chromadb
 from sentence_transformers import SentenceTransformer
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
@@ -22,14 +22,22 @@ client = chromadb.PersistentClient(path=DB_DIR)
 collection = client.get_or_create_collection("it_tickets")
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-api_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("OLLAMA_API_KEY")
 # Use same model as app.py
-llm = ChatGoogleGenerativeAI(model="gemini-3-flash-preview", google_api_key=api_key)
+llm = ChatOllama(
+    base_url="https://ollama.com",
+    model="qwen3.5",
+    client_kwargs={"headers": {"Authorization": f"Bearer {api_key}"}},
+)
 
 template = """
 You are an IT Support Resolution Assistant. You have been provided with the following similar past tickets and their solutions.
 Use this context to formulate a helpful, professional, and clear response to the user's current query.
-If the context doesn't have the answer, just give your best IT support advice, but prioritize the context.
+
+CRITICAL RULES:
+1. Prioritize the provided context to answer the user's query.
+2. If the context says 'No relevant past tickets found.', rely on your general IT knowledge to provide best-effort support.
+3. If the provided context does not contain a definitive technical solution (e.g., it just says 'assessing the problem' or 'let's schedule a meeting'), politely inform the user that their issue has been escalated to Tier 2 support for further investigation.
 
 Context (Past Tickets & Solutions):
 {context}
@@ -41,10 +49,21 @@ Helpful Answer:
 """
 rag_prompt = PromptTemplate.from_template(template)
 
-def format_docs(docs_data):
+def format_docs(docs_data, threshold=0.8):
     formatted = []
-    for doc, meta in zip(docs_data['documents'][0], docs_data['metadatas'][0]):
+    docs = docs_data.get('documents', [[]])[0]
+    metas = docs_data.get('metadatas', [[]])[0]
+    distances = docs_data.get('distances', [[]])[0]
+    
+    for doc, meta, dist in zip(docs, metas, distances):
+        # Only include documents that are semantically close to the query
+        if dist > threshold:
+            continue
         formatted.append(f"Past Issue: {doc}\nSolution Provided: {meta.get('answer', 'No solution recorded.')}")
+        
+    if not formatted:
+        return "No relevant past tickets found."
+        
     return "\n\n---\n\n".join(formatted)
 
 def call_llm_with_retry(chain, query, max_retries=3, base_delay=15):
@@ -66,13 +85,13 @@ def call_llm_with_retry(chain, query, max_retries=3, base_delay=15):
 print("="*80)
 print("LOADING TEST TICKETS FROM tickets_faq.csv")
 print("="*80)
-df = pd.read_csv("data/tickets_faq.csv")
+df = pd.read_csv("../../dataset/FAQ/tickets_faq.csv")
 print(f"Total tickets in CSV: {len(df)}")
 print(f"Columns: {list(df.columns)}")
 print(f"Intent distribution:\n{df['intent'].value_counts()}")
 
 # Pick 8 random tickets
-random.seed(42)  # reproducibility
+random.seed(42)  # Removed seed so it picks a completely new random batch every time
 sample_indices = random.sample(range(len(df)), 8)
 sample_tickets = df.iloc[sample_indices]
 
@@ -149,10 +168,16 @@ print("="*80)
 
 # Summary statistics
 print("\n--- DISTANCE SUMMARY ---")
-all_distances = [d for r in results for d in r['distances']]
-print(f"Min distance: {min(all_distances):.4f}")
-print(f"Max distance: {max(all_distances):.4f}")
-print(f"Avg distance: {sum(all_distances)/len(all_distances):.4f}")
+all_distances = [d for r in results for d in r['distances'] if d is not None]
+if all_distances:
+    print(f"Min distance: {min(all_distances):.4f}")
+    print(f"Max distance: {max(all_distances):.4f}")
+    print(f"Avg distance: {sum(all_distances)/len(all_distances):.4f}")
+else:
+    print("Min distance: N/A (no results retrieved)")
+    print("Max distance: N/A (no results retrieved)")
+    print("Avg distance: N/A (no results retrieved)")
+    print("\nWARNING: Your vector database appears to be empty! Please make sure to run the ingestion script before testing the RAG pipeline.")
 
 # Save results to JSON for analysis
 output_path = "rag_test_results.json"

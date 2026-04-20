@@ -45,9 +45,9 @@
         "tag_3": "Outage",
         "tag_4": "IT",
         "tag_5": "Tech Support",
-        "tag_6": null,
-        "tag_7": null,
-        "tag_8": null
+        "tag_6": NaN,
+        "tag_7": NaN,
+        "tag_8": NaN
       }
     ]
   }

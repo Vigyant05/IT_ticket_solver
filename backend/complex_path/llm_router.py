@@ -1,32 +1,24 @@
 import os
 import json
-import google.generativeai as genai
+from ollama import Client
 from pydantic import BaseModel
 from typing import List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Gemini
-API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=API_KEY)
+# Configure Ollama Cloud
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
+MODEL_ID = "qwen3.5"
 
-# Auto-detect best generative model
-def get_best_model():
-    try:
-        available = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        # Prefer flash for speed, then pro
-        for preferred in ['gemini-3-flash', 'gemini-1.5-pro', 'gemini-pro']:
-            for model_name in available:
-                if preferred in model_name:
-                    return model_name
-        return available[0] if available else 'gemini-3-flash-preview'
-    except:
-        return 'gemini-3-flash-preview'
+if not OLLAMA_API_KEY:
+    print("WARNING: OLLAMA_API_KEY is not set. LLM calls will fail.")
 
-model_name = get_best_model()
-print(f"LLM Router: Using model {model_name}")
-model = genai.GenerativeModel(model_name)
+client = Client(
+    host="https://ollama.com",
+    headers={"Authorization": f"Bearer {OLLAMA_API_KEY}"},
+)
+print(f"LLM Router: Using Ollama Cloud model {MODEL_ID}")
 
 class TicketAnalysis(BaseModel):
     category: str
@@ -44,31 +36,34 @@ Ticket:
 {ticket_text}
 
 Rules:
-1. category: Choose from [Infrastructure, Application, Security, General Support, Network].
+1. category: You MUST choose EXACTLY ONE from this list: [Infrastructure, Application, Security, General Support, Network]. Do not invent new categories.
 2. subcategory: Be specific (e.g., Server failure, CRM Error, Phishing, Password Reset).
 3. severity: 1 (Low) to 5 (Critical).
 4. urgency: 1 (Low) to 5 (Immediate).
-5. required_skills: A list of technical tags needed to solve this (e.g., ["linux", "database", "python"]).
+5. required_skills: A list of technical tags needed to resolve the ticket. You MUST EXCLUSIVELY choose tags from the following allowed list:
+[windows, office365, password-reset, outlook, hardware, printers, ios, android, mac-os, web-browser, zoom, teams, vpn, wifi, basic-networking, active-directory, user-onboarding, erp, sap, data-entry-errors, crm, salesforce, api-integration, internal-tools, hris, payroll-system, e-commerce, payment-gateway, shopify, bi-tools, tableau, powerbi, linux, shell-scripting, performance-tuning, db-failures, postgresql, mysql, indexing, storage, san, backups, disaster-recovery, virtualization, vmware, hyper-v, load-balancing, nginx, ha-proxy, docker, kubernetes, aws, terraform, azure, ci-cd, jenkins, ansible, gcp, serverless, lambda, functions, monitoring, prometheus, grafana, logging, python, go, infrastructure-as-code, phishing, malware, incident-response, iam, compliance, vault, encryption, vulnerability-scanning, ethical-hacking, siem, splunk, firewalls, soc, threat-hunting, ddos-mitigation]. Do not invent any tags outside of this list.
 6. is_common_issue: Boolean. True if it's a frequent, documented issue like a password reset or VPN setup.
 7. summary: A 1-sentence summary of the core problem.
 
-Return ONLY the JSON.
+Return ONLY the JSON. No markdown fences, no explanation.
 """
 
 def analyze_ticket(text: str) -> Optional[TicketAnalysis]:
     try:
         prompt = PROMPT_TEMPLATE.format(ticket_text=text)
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json",
-            )
+        response = client.chat(
+            model=MODEL_ID,
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+            format="json",
         )
         
-        data = json.loads(response.text)
+        raw_text = response.message.content.strip()
+        data = json.loads(raw_text)
         return TicketAnalysis(**data)
     except Exception as e:
-        print(f"Error analyzing ticket with Gemini: {e}")
+        print(f"Error analyzing ticket with Ollama: {e}")
         # Fallback to basic classification if LLM fails
         return None
 

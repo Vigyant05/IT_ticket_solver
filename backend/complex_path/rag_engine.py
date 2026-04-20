@@ -2,37 +2,38 @@ import json
 import os
 import faiss
 import numpy as np
-import google.generativeai as genai
+from ollama import Client
+from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Gemini
-API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3-flash')
+# Configure Ollama Cloud
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
+MODEL_ID = "qwen3.5"
+
+if not OLLAMA_API_KEY:
+    print("WARNING: OLLAMA_API_KEY is not set. LLM calls will fail.")
+
+ollama_client = Client(
+    host="https://ollama.com",
+    headers={"Authorization": f"Bearer {OLLAMA_API_KEY}"},
+)
+
+# Use sentence-transformers for embeddings (runs locally, lightweight)
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+print(f"RAG Engine: Using Ollama Cloud model {MODEL_ID} for generation")
+print(f"RAG Engine: Using sentence-transformers/all-MiniLM-L6-v2 for embeddings")
 
 class RAGService:
     def __init__(self, kb_path: str = "knowledge_base.json"):
         self.kb_path = kb_path
-        self.embeddings_cache = {}
         self.kb_data = []
         self.index = None
         self.load_kb()
 
     def get_embedding(self, text: str):
-        # Auto-detect first available embedding model
-        if not hasattr(self, 'model_name'):
-            available = [m.name for m in genai.list_models() if 'embedContent' in m.supported_generation_methods]
-            self.model_name = available[0] if available else "models/embedding-001"
-            print(f"RAG Engine: Using model {self.model_name}")
-
-        result = genai.embed_content(
-            model=self.model_name,
-            content=text,
-            task_type="retrieval_document"
-        )
-        return result['embedding']
+        return embedding_model.encode(text).tolist()
 
     def load_kb(self):
         if not os.path.exists(self.kb_path):
@@ -45,29 +46,21 @@ class RAGService:
         # Create Index
         sentences = [f"{item['issue']} : {item['resolution']}" for item in self.kb_data]
         
-        # Pull embeddings from Gemini API
+        # Pull embeddings using sentence-transformers
         print(f"RAG Engine: Fetching embeddings for {len(sentences)} items...")
-        embeddings = []
-        for s in sentences:
-            embeddings.append(self.get_embedding(s))
+        embeddings = embedding_model.encode(sentences)
         
         embeddings_np = np.array(embeddings).astype('float32')
         dimension = embeddings_np.shape[1]
         self.index = faiss.IndexFlatL2(dimension)
         self.index.add(embeddings_np)
-        print(f"RAG Engine: Successfully indexed {len(sentences)} items with Gemini Embeddings.")
+        print(f"RAG Engine: Successfully indexed {len(sentences)} items.")
 
     def search(self, query: str, k: int = 1):
         if not self.index:
             return []
         
-        # Use query embedding task type
-        query_embedding = genai.embed_content(
-            model=getattr(self, 'model_name', "models/embedding-001"),
-            content=query,
-            task_type="retrieval_query"
-        )['embedding']
-        
+        query_embedding = embedding_model.encode(query)
         query_vector = np.array([query_embedding]).astype('float32')
         distances, indices = self.index.search(query_vector, k)
         
@@ -83,7 +76,7 @@ class RAGService:
         
         context = "\n".join([f"Case: {c['issue']}\nResolution: {c['resolution']}" for c in similar_cases])
         
-        # 2. Prompt Gemini for a refined resolution
+        # 2. Prompt Ollama Cloud for a refined resolution
         prompt = f"""
         You are an IT Support AI. Use the provided context from historical tickets to propose a resolution for the new ticket.
         
@@ -97,8 +90,13 @@ class RAGService:
         Return your answer as professional markdown.
         """
         
-        response = model.generate_content(prompt)
-        return response.text
+        response = ollama_client.chat(
+            model=MODEL_ID,
+            messages=[
+                {"role": "user", "content": prompt},
+            ],
+        )
+        return response.message.content
 
 if __name__ == "__main__":
     rag = RAGService()

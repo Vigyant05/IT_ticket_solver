@@ -124,5 +124,61 @@ def resolve_ticket(ticket_id: int, db: Session = Depends(get_db)):
     return {"message": "Ticket resolved and agent load updated"}
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # import uvicorn
+    # uvicorn.run(app, host="0.0.0.0", port=8000)
+    print("\n--- IT Ticket Solver Terminal ---")
+    
+    from database import SessionLocal
+    import models
+    import llm_router
+    import routing_engine
+    
+    db = SessionLocal()
+    try:
+        while True:
+            try:
+                print("\nEnter Ticket Details (or Ctrl+C to exit):")
+                title = input("Title: ")
+                if not title.strip():
+                    continue
+                description = input("Description: ")
+                
+                db_ticket = models.Ticket(title=title, description=description)
+                db.add(db_ticket)
+                db.commit()
+                db.refresh(db_ticket)
+                
+                full_text = f"Title: {title}\nDescription: {description}"
+                analysis = llm_router.analyze_ticket(full_text)
+                
+                if not analysis:
+                    print("Warning: AI analysis failed. Falling back to default triage.")
+                    analysis = llm_router.TicketAnalysis(
+                        category="General Support",
+                        subcategory="Manual Triage Required",
+                        severity=3,
+                        urgency=3,
+                        required_skills=["general-support"],
+                        is_common_issue=False,
+                        summary="AI classification failed. Categorized as general support."
+                    )
+                    
+                agent = routing_engine.assign_ticket(db, db_ticket, analysis)
+                
+                print("\n--- Ticket Assignment ---")
+                print(f"Ticket ID: {db_ticket.id}")
+                print(f"Assigned Employee: {agent.name if agent else 'Unassigned'}")
+                if agent:
+                     print(f"Role: {agent.role}, Team: {agent.team}")
+                print(f"Category: {analysis.category}")
+                print(f"Subcategory: {analysis.subcategory}")
+                print(f"Severity: {analysis.severity}, Urgency: {analysis.urgency}")
+                print(f"Summary: {analysis.summary}")
+            except EOFError:
+                break
+    except KeyboardInterrupt:
+        print("\nExiting...")
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        db.close()

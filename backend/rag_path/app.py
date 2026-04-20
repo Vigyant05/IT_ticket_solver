@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import chromadb
 from sentence_transformers import SentenceTransformer
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -20,18 +20,26 @@ collection = client.get_or_create_collection("it_tickets")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Setup LLM based on environment key
-api_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("OLLAMA_API_KEY")
 if api_key:
-    llm = ChatGoogleGenerativeAI(model="gemini-3-flash-preview", google_api_key=api_key)
+    llm = ChatOllama(
+        base_url="https://ollama.com",
+        model="qwen3.5",
+        client_kwargs={"headers": {"Authorization": f"Bearer {api_key}"}},
+    )
 else:
     llm = None
-    print("WARNING: GEMINI_API_KEY is not set in environment. Answer generation will fallback to only returning retrieved text.")
+    print("WARNING: OLLAMA_API_KEY is not set in environment. Answer generation will fallback to only returning retrieved text.")
 
 # Define the RAG prompt
 template = """
 You are an IT Support Resolution Assistant. You have been provided with the following similar past tickets and their solutions.
 Use this context to formulate a helpful, professional, and clear response to the user's current query.
-If the context doesn't have the answer, just give your best IT support advice, but prioritize the context.
+
+CRITICAL RULES:
+1. Prioritize the provided context to answer the user's query.
+2. If the context says 'No relevant past tickets found.', rely on your general IT knowledge to provide best-effort support.
+3. If the provided context does not contain a definitive technical solution (e.g., it just says 'assessing the problem' or 'let's schedule a meeting'), politely inform the user that their issue has been escalated to Tier 2 support for further investigation.
 
 Context (Past Tickets & Solutions):
 {context}
@@ -56,11 +64,21 @@ class AppendRequest(BaseModel):
     priority: str = "medium"
 
 # --- RAG Core Logic ---
-def format_docs(docs_data):
+def format_docs(docs_data, threshold=0.8):
     formatted = []
-    for doc, meta in zip(docs_data['documents'][0], docs_data['metadatas'][0]):
-        # doc is the issue body, meta contains the past answer
+    docs = docs_data.get('documents', [[]])[0]
+    metas = docs_data.get('metadatas', [[]])[0]
+    distances = docs_data.get('distances', [[]])[0]
+    
+    for doc, meta, dist in zip(docs, metas, distances):
+        # Only include documents that are semantically close to the query
+        if dist > threshold:
+            continue
         formatted.append(f"Past Issue: {doc}\nSolution Provided: {meta.get('answer', 'No solution recorded.')}")
+        
+    if not formatted:
+        return "No relevant past tickets found."
+        
     return "\n\n---\n\n".join(formatted)
 
 
@@ -105,7 +123,7 @@ async def generate_answer(req: QueryRequest):
             return {
                 "user_query": req.question,
                 "retrieved_context": context_text,
-                "generated_answer": "NO API KEY SET: Here is what I found in the database. (Please set GEMINI_API_KEY to enable AI generative answers).\n\n" + context_text,
+                "generated_answer": "NO API KEY SET: Here is what I found in the database. (Please set OLLAMA_API_KEY to enable AI generative answers).\n\n" + context_text,
                 "llm_used": False
             }
 

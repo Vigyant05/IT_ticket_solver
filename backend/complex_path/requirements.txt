@@ -3,8 +3,9 @@ uvicorn
 sqlalchemy
 psycopg2-binary
 pydantic
-google-generativeai
+ollama
 faiss-cpu
 numpy
+sentence-transformers
 python-multipart
 python-dotenv

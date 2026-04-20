@@ -42,6 +42,7 @@ def seed_data():
             id=data["id"],
             name=data["name"],
             email=data["email"],
+            password="12345",
             role=data["role"],
             team=data["team"],
             expertise_tags=data["expertise"],
@@ -54,6 +55,9 @@ def seed_data():
     
     db.commit()
     print(f"Successfully seeded {len(employees_data)} employees.")
+
+    db.close()
+    return
 
     print("Seeding tickets...")
     tickets_data = [
