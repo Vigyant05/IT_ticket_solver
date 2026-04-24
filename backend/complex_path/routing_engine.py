@@ -41,25 +41,33 @@ def find_best_agent(db: Session, analysis: TicketAnalysis) -> Optional[Employee]
 
     # 3. Scoring
     best_agent = None
-    max_score = -1.0
+    max_score = -999.0
     
     for agent in candidates:
         # Skill Match: Overlap of expertise_tags and required_skills
         overlap = len(set(agent.expertise_tags) & set(analysis.required_skills))
         skill_score = overlap / max(len(analysis.required_skills), 1)
         
-        # Load score: Inverse of current load (more load = lower score)
-        # load of 0 gives score 1.0, load of 10 gives 0.1
-        load_score = 1.0 / (agent.current_load + 1)
-        
-        # Priority Capability: High: 1.0, Medium: 0.5, Low: 0.2
-        capability_map = {"High": 1.0, "Medium": 0.5, "Low": 0.2}
+        # Priority Capability mapping
+        capability_map = {"High": 1.0, "Medium": 0.5, "Low": 0.0}
         priority_cap_score = capability_map.get(agent.priority_handling_capability, 0.0)
         
-        # Total matching score
-        score = (SKILL_MATCH_WEIGHT * skill_score) + \
-                (LOAD_WEIGHT * load_score) + \
-                (PRIORITY_CAPABILITY_WEIGHT * priority_cap_score)
+        if analysis.severity >= 4:
+            # Critical ticket:
+            # - Massive weight on skill and capability
+            # - Very small load penalty so it assigns irrespective of workload
+            # A perfect skill match is worth 20 tickets.
+            score = (2.0 * skill_score) + (1.0 * priority_cap_score) - (0.1 * agent.current_load)
+        else:
+            # Normal ticket (severity < 4):
+            # - Prevent overloading using a strong load penalty
+            # - Invert priority cap to prefer assigning low-severity tickets to Low/Medium cap agents
+            inverse_cap_map = {"Low": 1.0, "Medium": 0.5, "High": 0.0}
+            inverted_cap_score = inverse_cap_map.get(agent.priority_handling_capability, 0.0)
+            
+            # A perfect skill match is worth exactly 2 tickets.
+            # This ensures an expert never gets more than 2 tickets ahead of a non-expert.
+            score = (2.0 * skill_score) + (0.5 * inverted_cap_score) - (1.0 * agent.current_load)
         
         if score > max_score:
             max_score = score

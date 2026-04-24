@@ -1,24 +1,21 @@
 import os
 import json
-from ollama import Client
+from groq import Groq
 from pydantic import BaseModel
 from typing import List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure Ollama Cloud
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
-MODEL_ID = "qwen3.5"
+# Configure Groq Cloud
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL_ID = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-if not OLLAMA_API_KEY:
-    print("WARNING: OLLAMA_API_KEY is not set. LLM calls will fail.")
+if not GROQ_API_KEY:
+    print("WARNING: GROQ_API_KEY is not set in .env. LLM calls will fail.")
 
-client = Client(
-    host="https://ollama.com",
-    headers={"Authorization": f"Bearer {OLLAMA_API_KEY}"},
-)
-print(f"LLM Router: Using Ollama Cloud model {MODEL_ID}")
+client = Groq(api_key=GROQ_API_KEY)
+print(f"LLM Router: Using Groq LPU model {MODEL_ID}")
 
 class TicketAnalysis(BaseModel):
     category: str
@@ -51,19 +48,20 @@ Return ONLY the JSON. No markdown fences, no explanation.
 def analyze_ticket(text: str) -> Optional[TicketAnalysis]:
     try:
         prompt = PROMPT_TEMPLATE.format(ticket_text=text)
-        response = client.chat(
+        response = client.chat.completions.create(
             model=MODEL_ID,
             messages=[
                 {"role": "user", "content": prompt},
             ],
-            format="json",
+            response_format={"type": "json_object"},
+            temperature=0.0
         )
         
-        raw_text = response.message.content.strip()
+        raw_text = response.choices[0].message.content.strip()
         data = json.loads(raw_text)
         return TicketAnalysis(**data)
     except Exception as e:
-        print(f"Error analyzing ticket with Ollama: {e}")
+        print(f"Error analyzing ticket with Groq: {e}")
         # Fallback to basic classification if LLM fails
         return None
 

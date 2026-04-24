@@ -57,7 +57,7 @@ def seed_data():
     print(f"Successfully seeded {len(employees_data)} employees.")
 
     db.close()
-    return
+    
 
     print("Seeding tickets...")
     tickets_data = [
