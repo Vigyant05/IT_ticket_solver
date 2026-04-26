@@ -1,0 +1,872 @@
+{
+  "name": "MiniPrj",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -672,
+        32
+      ],
+      "id": "2fb0d1bb-1c57-4383-b1b6-ed92509fbb9f",
+      "name": "When chat message received",
+      "webhookId": "3029f323-e24b-4aa6-b0ae-44bc0f0c969d"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f8f960e7-ac58-495e-abe7-e4c08641300c",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "=password",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "password"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c584e816-25cd-4931-a70e-cf816867ffe3",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "vpn",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "vpn"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7da9f76b-af22-40cc-9447-8a8bc7222317",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "wifi",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "wifi"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c8c0ba57-c2cb-4179-bb6e-e31964627da7",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "printer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "printer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "90628946-d34b-419f-982a-a5a717fa578e",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "email",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a7a3f018-de39-429b-8a3e-09162d56bd89",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "access",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "access"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "30bc872b-92ca-4646-b930-afb3830d689a",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "slow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "slow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1e2907c4-f109-409d-9dd9-3ad8fa33743e",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "disk",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "disk"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2c11fc4c-496a-4b64-840e-0113ec9e5402",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "account_lock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "account_lock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "32c9a11d-c34f-48d9-9de5-717e8c95fb8c",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "software_install",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "software_install"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a432d1c7-4523-43d7-8fe0-f2e01b695be0",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "network",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "network"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "735534f9-13cc-404e-9b4b-b894970a56bb",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "server",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "server"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "30148385-acca-4007-85e8-aa7c2620fb19",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "backup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "backup"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "243959d7-727a-4b6f-a45e-2043c55cca1b",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "database",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "database"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7225ef1a-c3cf-468b-bb1d-b5a04d3f37b3",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "permissions",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "permissions"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "616d71cd-c716-46f4-8db8-d3dee45d1265",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "hardware",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "hardware"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5daccb32-d831-4687-bff9-4ea0e54d803b",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "security",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "security"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -96
+      ],
+      "id": "118d070e-f173-45d7-b7c6-1bfbe64b11f9",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// vpn\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"VPN Fix\",\n  logs: [\n    \"Checking VPN client...\",\n    \"Re-establishing connection...\",\n    \"Validating credentials...\",\n    \"VPN connected\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -592
+      ],
+      "id": "b386ff90-36f3-40d5-b394-e9c7cb986010",
+      "name": "VPN"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Replicates your Python logic exactly\nawait new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay\n\nreturn [{\n  status: \"Success\",\n  action: \"Password Reset\",\n  logs: [\n    \"Validating user...\",\n    \"Connecting to auth server...\",\n    \"Resetting password...\",\n    \"Done\"\n  ],\n  data: \"TempPass@123\"\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -784
+      ],
+      "id": "387633ef-97da-46dc-ae3a-bfec2a448139",
+      "name": "Password Reset"
+    },
+    {
+      "parameters": {
+        "jsCode": "// wifi\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"WiFi Fix\",\n  logs: [\n    \"Scanning networks...\",\n    \"Reconnecting to WiFi...\",\n    \"Refreshing IP...\",\n    \"WiFi stable\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -352
+      ],
+      "id": "246f24b5-293f-4436-8f09-d976b3eef369",
+      "name": "Wifi"
+    },
+    {
+      "parameters": {
+        "jsCode": "// printer\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Printer Fix\",\n  logs: [\n    \"Checking printer status...\",\n    \"Clearing queue...\",\n    \"Restarting spooler...\",\n    \"Printer ready\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        -208
+      ],
+      "id": "adad52d5-68d1-46ce-b333-a4895b8aa19d",
+      "name": "Printer"
+    },
+    {
+      "parameters": {
+        "jsCode": "// email\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Email Repair\",\n  logs: [\n    \"Checking mail server...\",\n    \"Refreshing credentials...\",\n    \"Syncing inbox...\",\n    \"Email working\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -224
+      ],
+      "id": "607e1c64-10f9-4905-b522-4e22fe8f4117",
+      "name": "Email"
+    },
+    {
+      "parameters": {
+        "jsCode": "// access\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Access Grant\",\n  logs: [\n    \"Validating user...\",\n    \"Checking permissions...\",\n    \"Granting access...\",\n    \"Access confirmed\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -112
+      ],
+      "id": "2634289c-03cf-4cbe-9ce3-78aafc2bf028",
+      "name": "Access Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// slow\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Performance Fix\",\n  logs: [\n    \"Checking system load...\",\n    \"Clearing temp files...\",\n    \"Optimizing processes...\",\n    \"System running smoothly\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -32
+      ],
+      "id": "89821ca2-d226-475d-bcc3-dcce94beee1c",
+      "name": "System Slow "
+    },
+    {
+      "parameters": {
+        "jsCode": "// disk\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Disk Cleanup\",\n  logs: [\n    \"Analyzing disk usage...\",\n    \"Removing junk files...\",\n    \"Freeing space...\",\n    \"Disk optimized\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        64
+      ],
+      "id": "46ca9541-a693-452b-88ee-d103f9755699",
+      "name": "Disk Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// account_lock\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Account Unlock\",\n  logs: [\n    \"Verifying identity...\",\n    \"Unlocking account...\",\n    \"Resetting attempts...\",\n    \"Account accessible\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        160
+      ],
+      "id": "f791bcb4-6ea4-4b6e-9e87-a98377c33d73",
+      "name": "Account Lock Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// software_install\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Software Install\",\n  logs: [\n    \"Downloading package...\",\n    \"Installing software...\",\n    \"Configuring setup...\",\n    \"Installation complete\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        256
+      ],
+      "id": "63498c29-9b2f-4992-b1a7-af1a6b47374e",
+      "name": "Software Installation Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// network\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Network Fix\",\n  logs: [\n    \"Diagnosing network...\",\n    \"Resetting adapters...\",\n    \"Renewing IP...\",\n    \"Network restored\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        352
+      ],
+      "id": "8de522da-d8c9-4b85-9b62-b15896b1ebb3",
+      "name": "Network Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// server\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Server Restart\",\n  logs: [\n    \"Checking server health...\",\n    \"Restarting services...\",\n    \"Validating uptime...\",\n    \"Server operational\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        448
+      ],
+      "id": "17db715b-aa1b-4418-92c9-56b9ea5b1a22",
+      "name": "Server Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// backup\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Backup Restore\",\n  logs: [\n    \"Locating backup...\",\n    \"Restoring data...\",\n    \"Verifying integrity...\",\n    \"Backup successful\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        480
+      ],
+      "id": "77187985-df82-48ec-aedc-03796fbf78a3",
+      "name": "Backup Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// database\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Database Repair\",\n  logs: [\n    \"Checking DB status...\",\n    \"Repairing tables...\",\n    \"Optimizing queries...\",\n    \"Database stable\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        608
+      ],
+      "id": "55688586-7525-463c-b7e8-403914de7b5b",
+      "name": "Database Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// permissions\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Permission Update\",\n  logs: [\n    \"Reviewing roles...\",\n    \"Updating permissions...\",\n    \"Applying policies...\",\n    \"Permissions updated\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        672
+      ],
+      "id": "e2acc239-e6a6-48f7-8d04-13c47d18999e",
+      "name": "Permissions Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// hardware\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Hardware Check\",\n  logs: [\n    \"Scanning hardware...\",\n    \"Diagnosing issues...\",\n    \"Updating drivers...\",\n    \"Hardware functioning\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        784
+      ],
+      "id": "bb4e08b2-3a0d-4191-a4be-22299bba6b3a",
+      "name": "Hardware Issue"
+    },
+    {
+      "parameters": {
+        "jsCode": "// security\nawait new Promise(resolve => setTimeout(resolve, 2000));\n\nreturn [{\n  status: \"Success\",\n  action: \"Security Scan\",\n  logs: [\n    \"Running security scan...\",\n    \"Identifying threats...\",\n    \"Applying fixes...\",\n    \"System secured\"\n  ]\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        864
+      ],
+      "id": "5b1ba842-1264-484f-9eb7-0d8354e71764",
+      "name": "Security Issue"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-flash-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-flash-preview"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an IT support classifier.\n\nClassify the user's issue into EXACTLY ONE of these categories:\n\npassword\nvpn\nwifi\nprinter\nemail\naccess\nslow\ndisk\naccount_lock\nsoftware_install\nnetwork\nserver\nbackup\ndatabase\npermissions\nhardware\nsecurity\n\nONLY return ONE WORD from the list above. No explanation.\n\nUser message:\n{{$json[\"chatInput\"]}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "cc60643b-0aa6-416d-b962-25cd4e25450b",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kWtxqmAGM5JYYTSV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Password Reset",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "VPN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wifi",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Printer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Access Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "System Slow ",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Disk Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Account Lock Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Software Installation Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Network Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Server Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Backup Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Database Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Permissions Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hardware Issue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Security Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "71cfedc2-e5e9-4616-aee0-2a3a54f34b3a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "QxBUMH1LRdPzzLfe",
+  "tags": []
+}
