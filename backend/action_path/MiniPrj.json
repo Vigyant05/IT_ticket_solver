@@ -8,10 +8,10 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.4,
       "position": [
-        -672,
-        32
+        -1104,
+        928
       ],
-      "id": "2fb0d1bb-1c57-4383-b1b6-ed92509fbb9f",
+      "id": "ad987214-acfb-451e-b53e-e2e79b2941fe",
       "name": "When chat message received",
       "webhookId": "3029f323-e24b-4aa6-b0ae-44bc0f0c969d"
     },
@@ -30,7 +30,7 @@
                 "conditions": [
                   {
                     "id": "f8f960e7-ac58-495e-abe7-e4c08641300c",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "=password",
                     "operator": {
                       "type": "string",
@@ -54,7 +54,7 @@
                 "conditions": [
                   {
                     "id": "c584e816-25cd-4931-a70e-cf816867ffe3",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "{{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "vpn",
                     "operator": {
                       "type": "string",
@@ -78,7 +78,7 @@
                 "conditions": [
                   {
                     "id": "7da9f76b-af22-40cc-9447-8a8bc7222317",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "wifi",
                     "operator": {
                       "type": "string",
@@ -102,7 +102,7 @@
                 "conditions": [
                   {
                     "id": "c8c0ba57-c2cb-4179-bb6e-e31964627da7",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "printer",
                     "operator": {
                       "type": "string",
@@ -127,7 +127,7 @@
                 "conditions": [
                   {
                     "id": "90628946-d34b-419f-982a-a5a717fa578e",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "email",
                     "operator": {
                       "type": "string",
@@ -152,7 +152,7 @@
                 "conditions": [
                   {
                     "id": "a7a3f018-de39-429b-8a3e-09162d56bd89",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "access",
                     "operator": {
                       "type": "string",
@@ -177,7 +177,7 @@
                 "conditions": [
                   {
                     "id": "30bc872b-92ca-4646-b930-afb3830d689a",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "slow",
                     "operator": {
                       "type": "string",
@@ -202,7 +202,7 @@
                 "conditions": [
                   {
                     "id": "1e2907c4-f109-409d-9dd9-3ad8fa33743e",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "disk",
                     "operator": {
                       "type": "string",
@@ -227,7 +227,7 @@
                 "conditions": [
                   {
                     "id": "2c11fc4c-496a-4b64-840e-0113ec9e5402",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "account_lock",
                     "operator": {
                       "type": "string",
@@ -252,7 +252,7 @@
                 "conditions": [
                   {
                     "id": "32c9a11d-c34f-48d9-9de5-717e8c95fb8c",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "software_install",
                     "operator": {
                       "type": "string",
@@ -277,7 +277,7 @@
                 "conditions": [
                   {
                     "id": "a432d1c7-4523-43d7-8fe0-f2e01b695be0",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "network",
                     "operator": {
                       "type": "string",
@@ -302,7 +302,7 @@
                 "conditions": [
                   {
                     "id": "735534f9-13cc-404e-9b4b-b894970a56bb",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "server",
                     "operator": {
                       "type": "string",
@@ -327,7 +327,7 @@
                 "conditions": [
                   {
                     "id": "30148385-acca-4007-85e8-aa7c2620fb19",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "backup",
                     "operator": {
                       "type": "string",
@@ -352,7 +352,7 @@
                 "conditions": [
                   {
                     "id": "243959d7-727a-4b6f-a45e-2043c55cca1b",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "database",
                     "operator": {
                       "type": "string",
@@ -377,7 +377,7 @@
                 "conditions": [
                   {
                     "id": "7225ef1a-c3cf-468b-bb1d-b5a04d3f37b3",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "permissions",
                     "operator": {
                       "type": "string",
@@ -402,7 +402,7 @@
                 "conditions": [
                   {
                     "id": "616d71cd-c716-46f4-8db8-d3dee45d1265",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "hardware",
                     "operator": {
                       "type": "string",
@@ -427,7 +427,7 @@
                 "conditions": [
                   {
                     "id": "5daccb32-d831-4687-bff9-4ea0e54d803b",
-                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "leftValue": "={{ $json.text.trim().toLowerCase() }}",
                     "rightValue": "security",
                     "operator": {
                       "type": "string",
@@ -448,10 +448,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -48,
-        -96
+        -480,
+        800
       ],
-      "id": "118d070e-f173-45d7-b7c6-1bfbe64b11f9",
+      "id": "41269f61-82eb-47c9-b7ee-8efb68e3209f",
       "name": "Switch"
     },
     {
@@ -461,10 +461,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        352,
-        -592
+        -80,
+        304
       ],
-      "id": "b386ff90-36f3-40d5-b394-e9c7cb986010",
+      "id": "0d54d7b4-b01c-4a88-833f-d7e0180d4a6f",
       "name": "VPN"
     },
     {
@@ -474,10 +474,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        288,
-        -784
+        -144,
+        112
       ],
-      "id": "387633ef-97da-46dc-ae3a-bfec2a448139",
+      "id": "7db08fe1-0113-4f89-8896-0d4c38db02ee",
       "name": "Password Reset"
     },
     {
@@ -487,10 +487,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        -352
+        -48,
+        544
       ],
-      "id": "246f24b5-293f-4436-8f09-d976b3eef369",
+      "id": "611ff01c-d44b-4864-81a7-8f6786078dfc",
       "name": "Wifi"
     },
     {
@@ -500,10 +500,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        304,
-        -208
+        -128,
+        688
       ],
-      "id": "adad52d5-68d1-46ce-b333-a4895b8aa19d",
+      "id": "42e85a6f-6559-4c7a-b701-a71ee487b97e",
       "name": "Printer"
     },
     {
@@ -513,10 +513,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        640,
-        -224
+        208,
+        672
       ],
-      "id": "607e1c64-10f9-4905-b522-4e22fe8f4117",
+      "id": "310be5a9-da20-4703-b96d-ab87d6bb9bef",
       "name": "Email"
     },
     {
@@ -526,10 +526,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        -112
+        80,
+        784
       ],
-      "id": "2634289c-03cf-4cbe-9ce3-78aafc2bf028",
+      "id": "830848e0-096e-4b76-9db3-ef783be02782",
       "name": "Access Issue"
     },
     {
@@ -539,10 +539,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
-        -32
+        272,
+        864
       ],
-      "id": "89821ca2-d226-475d-bcc3-dcce94beee1c",
+      "id": "72fca927-12de-4e98-b38d-eb45199aab95",
       "name": "System Slow "
     },
     {
@@ -552,10 +552,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        64
+        96,
+        960
       ],
-      "id": "46ca9541-a693-452b-88ee-d103f9755699",
+      "id": "148fec28-4921-4dc7-97ae-fcc7b20b60e9",
       "name": "Disk Issue"
     },
     {
@@ -565,10 +565,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        352,
-        160
+        -80,
+        1056
       ],
-      "id": "f791bcb4-6ea4-4b6e-9e87-a98377c33d73",
+      "id": "1e3b98de-8111-4c81-8c64-304ae43690e9",
       "name": "Account Lock Issue"
     },
     {
@@ -578,10 +578,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        256
+        96,
+        1152
       ],
-      "id": "63498c29-9b2f-4992-b1a7-af1a6b47374e",
+      "id": "1cf278bb-afbe-4db8-8559-1b383737c269",
       "name": "Software Installation Issue"
     },
     {
@@ -591,10 +591,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        688,
-        352
+        256,
+        1248
       ],
-      "id": "8de522da-d8c9-4b85-9b62-b15896b1ebb3",
+      "id": "b79b8b3e-9832-447c-a109-2e25017b4f19",
       "name": "Network Issue"
     },
     {
@@ -604,10 +604,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
-        448
+        512,
+        1344
       ],
-      "id": "17db715b-aa1b-4418-92c9-56b9ea5b1a22",
+      "id": "59f92969-0a56-4d1c-befb-7b462cded137",
       "name": "Server Issue"
     },
     {
@@ -617,10 +617,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        624,
-        480
+        192,
+        1376
       ],
-      "id": "77187985-df82-48ec-aedc-03796fbf78a3",
+      "id": "39f61cf0-a22a-4f93-9c3e-228f54792761",
       "name": "Backup Issue"
     },
     {
@@ -630,10 +630,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        816,
-        608
+        384,
+        1504
       ],
-      "id": "55688586-7525-463c-b7e8-403914de7b5b",
+      "id": "2015a9da-bebc-4b43-8820-21335d016968",
       "name": "Database Issue"
     },
     {
@@ -643,10 +643,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        672
+        240,
+        1568
       ],
-      "id": "e2acc239-e6a6-48f7-8d04-13c47d18999e",
+      "id": "28299ec8-ecc3-4ca5-aa13-4efb3cee5589",
       "name": "Permissions Issue"
     },
     {
@@ -656,10 +656,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        784
+        368,
+        1680
       ],
-      "id": "bb4e08b2-3a0d-4191-a4be-22299bba6b3a",
+      "id": "ef2cf760-b498-4406-ab17-e871ce8eaa6b",
       "name": "Hardware Issue"
     },
     {
@@ -669,42 +669,50 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        592,
-        864
+        160,
+        1760
       ],
-      "id": "5b1ba842-1264-484f-9eb7-0d8354e71764",
+      "id": "cd5d1695-126c-455b-91b6-31e3a08602bd",
       "name": "Security Issue"
     },
     {
       "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-3-flash-preview",
-          "mode": "list",
-          "cachedResultName": "models/gemini-3-flash-preview"
-        },
         "messages": {
-          "values": [
+          "messageValues": [
             {
-              "content": "=You are an IT support classifier.\n\nClassify the user's issue into EXACTLY ONE of these categories:\n\npassword\nvpn\nwifi\nprinter\nemail\naccess\nslow\ndisk\naccount_lock\nsoftware_install\nnetwork\nserver\nbackup\ndatabase\npermissions\nhardware\nsecurity\n\nONLY return ONE WORD from the list above. No explanation.\n\nUser message:\n{{$json[\"chatInput\"]}}"
+              "message": "You are an IT support classifier.  Classify the user's issue into EXACTLY ONE of these categories: password vpn wifi printer email access slow disk account_lock software_install network server backup database permissions hardware security  RULES: 1. ONLY return ONE WORD from the list above.  2. No explanation, no punctuation, no conversational text. 3. If the issue does not clearly fit any category, output: hardware"
             }
           ]
         },
-        "builtInTools": {},
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -896,
+        928
+      ],
+      "id": "d66bf3c2-3a80-4829-a2fb-8303bad1a740",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1.1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
       "position": [
-        -352,
-        96
+        -976,
+        1136
       ],
-      "id": "cc60643b-0aa6-416d-b962-25cd4e25450b",
-      "name": "Message a model",
+      "id": "c3a0f277-87ed-4986-b039-693d2295a5b2",
+      "name": "Groq Chat Model",
+      "notesInFlow": false,
       "credentials": {
-        "googlePalmApi": {
-          "id": "kWtxqmAGM5JYYTSV",
-          "name": "Google Gemini(PaLM) Api account"
+        "groqApi": {
+          "id": "s9heVpHuY9uceZDS",
+          "name": "Groq account"
         }
       }
     }
@@ -715,7 +723,7 @@
       "main": [
         [
           {
-            "node": "Message a model",
+            "node": "Basic LLM Chain",
             "type": "main",
             "index": 0
           }
@@ -845,12 +853,23 @@
         ]
       ]
     },
-    "Message a model": {
+    "Basic LLM Chain": {
       "main": [
         [
           {
             "node": "Switch",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -862,11 +881,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "71cfedc2-e5e9-4616-aee0-2a3a54f34b3a",
+  "versionId": "51bc32fb-fc92-413b-a25b-72b16d515368",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
   },
-  "id": "QxBUMH1LRdPzzLfe",
+  "id": "MqYQ51uKQf5EslBQ",
   "tags": []
 }
