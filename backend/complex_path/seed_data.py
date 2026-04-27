@@ -10,19 +10,19 @@ def seed_data():
 
     print("Seeding employees...")
     employees_data = [
-        {"id": 1, "name": "Vigyant N", "email": "veryone@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["windows", "office365", "password-reset", "outlook"], "skill": 2, "priority": "Low"},
-        {"id": 2, "name": "Oliver J", "email": "oliverj@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["hardware", "printers", "ios", "android"], "skill": 1, "priority": "Low"},
-        {"id": 3, "name": "Vivekanada S", "email": "vivek@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["mac-os", "web-browser", "zoom", "teams"], "skill": 2, "priority": "Medium"},
-        {"id": 4, "name": "Rishab T", "email": "rishabt@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["vpn", "wifi", "basic-networking"], "skill": 3, "priority": "Medium"},
-        {"id": 5, "name": "Shreyas NVM", "email": "shreyasnvm@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["active-directory", "user-onboarding"], "skill": 3, "priority": "High"},
-        {"id": 6, "name": "Rahul M", "email": "rahulm@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["erp", "sap", "data-entry-errors"], "skill": 3, "priority": "Medium"},
+        {"id": 1, "name": "Vigyant N", "email": "veryone@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["windows", "office365", "password-reset", "outlook", "macos", "software-install"], "skill": 2, "priority": "Low"},
+        {"id": 2, "name": "Oliver J", "email": "oliverj@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["hardware", "printers", "ios", "android", "peripherals"], "skill": 1, "priority": "Low"},
+        {"id": 3, "name": "Vivekanada S", "email": "vivek@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["mac-os", "web-browser", "zoom", "teams", "slack"], "skill": 2, "priority": "Medium"},
+        {"id": 4, "name": "Rishab T", "email": "rishabt@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["vpn", "wifi", "basic-networking", "intranet"], "skill": 3, "priority": "Medium"},
+        {"id": 5, "name": "Shreyas NVM", "email": "shreyasnvm@msrit.com", "role": "Associate", "team": "L1 Support", "expertise": ["active-directory", "user-onboarding", "permissions"], "skill": 3, "priority": "High"},
+        {"id": 6, "name": "Rahul M", "email": "rahulm@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["erp", "sap", "data-entry-errors", "jira", "confluence"], "skill": 3, "priority": "Medium"},
         {"id": 7, "name": "Shreya S", "email": "shreyas@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["crm", "salesforce", "api-integration"], "skill": 4, "priority": "High"},
         {"id": 8, "name": "Yasho S", "email": "yashos@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["internal-tools", "hris", "payroll-system"], "skill": 3, "priority": "Medium"},
         {"id": 9, "name": "Reyansh K", "email": "reyanshk@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["e-commerce", "payment-gateway", "shopify"], "skill": 4, "priority": "High"},
         {"id": 10, "name": "Pranay K", "email": "pranayk@msrit.com", "role": "Specialist", "team": "L2 Application", "expertise": ["bi-tools", "tableau", "powerbi"], "skill": 4, "priority": "Medium"},
-        {"id": 11, "name": "Zain Al", "email": "zainal@msrit.com", "role": "Architect", "team": "L3 Infrastructure", "expertise": ["linux", "shell-scripting", "performance-tuning"], "skill": 5, "priority": "High"},
-        {"id": 12, "name": "Jhon S", "email": "jhons@msrit.com", "role": "Senior Engineer", "team": "L3 Infrastructure", "expertise": ["db-failures", "postgresql", "mysql", "indexing"], "skill": 5, "priority": "High"},
-        {"id": 13, "name": "Jhonson ", "email": "jhonson@msrit.com", "role": "Senior Engineer", "team": "L3 Infrastructure", "expertise": ["storage", "san", "backups", "disaster-recovery"], "skill": 4, "priority": "High"},
+        {"id": 11, "name": "Zain Al", "email": "zainal@msrit.com", "role": "Architect", "team": "L3 Infrastructure", "expertise": ["linux", "shell-scripting", "performance-tuning", "networking", "dns"], "skill": 5, "priority": "High"},
+        {"id": 12, "name": "Jhon S", "email": "jhons@msrit.com", "role": "Senior Engineer", "team": "L3 Infrastructure", "expertise": ["db-failures", "postgresql", "postgres", "mysql", "mongodb", "oracle", "nosql", "indexing"], "skill": 5, "priority": "High"},
+        {"id": 13, "name": "Jhonson ", "email": "jhonson@msrit.com", "role": "Senior Engineer", "team": "L3 Infrastructure", "expertise": ["storage", "san", "backups", "disaster-recovery", "data-loss"], "skill": 4, "priority": "High"},
         {"id": 14, "name": "Shreya D", "email": "shreyad@msrit.com", "role": "Architect", "team": "L3 Infrastructure", "expertise": ["virtualization", "vmware", "hyper-v"], "skill": 5, "priority": "High"},
         {"id": 15, "name": "Joyal J", "email": "joyalj@msrit.com", "role": "Senior Engineer", "team": "L3 Infrastructure", "expertise": ["load-balancing", "nginx", "ha-proxy"], "skill": 4, "priority": "Medium"},
         {"id": 16, "name": "Yash R", "email": "yashr@msrit.com", "role": "DevOps Engineer", "team": "DevOps", "expertise": ["docker", "kubernetes", "aws", "terraform"], "skill": 5, "priority": "High"},
@@ -57,7 +57,7 @@ def seed_data():
     print(f"Successfully seeded {len(employees_data)} employees.")
 
     db.close()
-    
+    return
 
     print("Seeding tickets...")
     tickets_data = [

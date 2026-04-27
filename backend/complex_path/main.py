@@ -125,7 +125,7 @@ def resolve_ticket(ticket_id: int, db: Session = Depends(get_db)):
 
 if __name__ == "__main__":
     # import uvicorn
-    # uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="0.0.0.0", port=8001)
     print("\n--- IT Ticket Solver Terminal ---")
     
     from database import SessionLocal

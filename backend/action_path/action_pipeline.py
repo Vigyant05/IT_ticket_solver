@@ -34,13 +34,13 @@ def send_ticket_to_n8n(ticket_text, webhook_url):
         # Try to parse the response if it returns one
         try:
             resp_data = response.json()
-            print(f"✅ Success! n8n responded: {resp_data.get('output', resp_data)}")
+            print(f"Success! n8n responded: {resp_data.get('output', resp_data)}")
         except ValueError:
-            print(f"✅ Success! (No JSON returned, status: {response.status_code})")
+            print(f"Success! (No JSON returned, status: {response.status_code})")
             
         return True
     except requests.exceptions.RequestException as e:
-        print(f"❌ Error connecting to n8n workflow: {e}")
+        print(f"Error connecting to n8n workflow: {e}")
         print("Make sure your n8n workflow is running (click 'Execute Workflow' or activate it).")
         return False
 

@@ -1,36 +1,49 @@
 # IT Ticket Solver
 
-This repository contains the backend automation system for routing and resolving IT tickets. The system is split into multiple paths based on ticket complexity.
+This repository contains the backend automation system for routing and resolving IT tickets. The system is split into multiple paths based on ticket complexity, all orchestrated by a **Unified LangGraph Pipeline**.
 
-## 1. AI Router Agent (Central Dispatcher)
-Classifies incoming tickets into `FAQ`, `Action`, or `Complex`.
+## Unified Pipeline (Main Entry Point)
+The Unified Pipeline uses **LangGraph** to act as the brain. It takes incoming tickets, classifies their intent using an LLM, and instantly routes them to the correct microservice (n8n, Vector DB, or Human Routing Engine).
 
-**Setup:**
-1. Navigate to `backend/ai_router_agent`
-2. Create a `.env` file and add your Groq key: `GROQ_API_KEY=your_key_here`
-3. Install dependencies: `pip install -r requirements.txt` (or install `groq`, `python-dotenv`)
+**Setup Everything:**
+1. Navigate to the `backend/` folder.
+2. Install all dependencies: `pip install -r requirements.txt`
+3. Add your `GROQ_API_KEY` inside `.env` files for `ai_router_agent` and `complex_path`.
+4. Add your `OLLAMA_API_KEY` inside the `.env` for `rag_path`.
+5. Seed the human expert database: `cd complex_path && python seed_data.py && cd ..`
 
-**Run:**
-- Test a single ticket: `python router_agent.py "I need a password reset"`
-- Test a batch: `python router_agent.py --csv test_tickets.csv`
+**Run the Full System:**
+Because the paths run as independent microservices, you need **two** terminal windows:
+- **Terminal 1 (RAG API):** `cd backend/rag_path` -> `uvicorn app:app --port 8000`
+- **Terminal 2 (Main Brain):** `cd backend` -> `uvicorn pipeline:app --port 8080 --reload`
+
+**Test the Pipeline:**
+Send a POST request to the brain (port 8080):
+```bash
+curl -X POST "http://localhost:8080/submit_ticket" \
+     -H "Content-Type: application/json" \
+     -d '{"ticket_id": "TKT-001", "ticket_text": "Please reset my Active Directory password."}'
+```
 
 ---
 
-## 2. Complex Path (Intelligent Routing Engine)
-Handles severe/complex tickets by routing them to human experts based on skill matching and workload balance using Groq's LPU.
+## Individual Microservices
+
+### 1. Complex Path (Intelligent Routing Engine)
+Handles severe tickets by routing them to human experts based on skill matching and workload balance using Groq's LPU.
 
 **Setup:**
 1. Navigate to `backend/complex_path`
 2. Create a `.env` file and add your Groq key: `GROQ_API_KEY=your_key_here`
-3. Install requirements (FastAPI, SQLAlchemy, Groq, etc.)
+3. Ensure dependencies are installed.
 
 **Run:**
 - Run the evaluation metric test on 20 real tickets: `python metric_eval.py --real 20`
-- Or run the main API: `uvicorn main:app --reload`
+- Or run the standalone API (Port 8001): `uvicorn main:app --port 8001 --reload`
 
 ---
 
-## 3. Action Path (n8n Automation)
+### 2. Action Path (n8n Automation)
 Executes basic Action tickets (password resets, WiFi fixes, etc.) via local n8n workflows.
 
 **Setup:**
@@ -47,17 +60,28 @@ Executes basic Action tickets (password resets, WiFi fixes, etc.) via local n8n 
 
 ---
 
-## 4. RAG Path (FAQ / Knowledge Base)
-Answers FAQ tickets by retrieving solutions from past tickets stored in a local vector database.
+### 3. RAG Path (FAQ / Knowledge Base)
+Answers FAQ tickets by retrieving solutions from past tickets stored in a local ChromaDB vector database.
 
 **Setup:**
 1. Navigate to `backend/rag_path`
 2. Create a `.env` file and add your Ollama Cloud key: `OLLAMA_API_KEY=your_key_here`
-3. Install dependencies (FastAPI, ChromaDB, Langchain, etc.)
-4. Load your initial historical ticket data into the vector database by running:
-   `python ingest_data.py`
+3. Load your initial historical ticket data into the vector database by running: `python ingest_data.py`
 
 **Run:**
-- Start the Retrieval-Augmented Generation API server:
-  `uvicorn app:app --reload`
-- The API will run on `http://localhost:8000`. You can test the endpoints interactively by going to `http://localhost:8000/docs` in your browser.
+- Start the Retrieval-Augmented Generation API server (Port 8000):
+  `uvicorn app:app --port 8000 --reload`
+- Test the endpoints interactively at `http://localhost:8000/docs`.
+
+---
+
+### 4. AI Router Agent (Central Dispatcher)
+The core Groq-powered classifier used by the Unified Pipeline. 
+
+**Setup:**
+1. Navigate to `backend/ai_router_agent`
+2. Create a `.env` file and add your Groq key: `GROQ_API_KEY=your_key_here`
+
+**Run:**
+- Test a single ticket: `python router_agent.py "I need a password reset"`
+- Test a batch: `python router_agent.py --csv test_tickets.csv`

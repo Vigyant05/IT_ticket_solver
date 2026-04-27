@@ -102,6 +102,17 @@ async def generate_answer(req: QueryRequest):
         # 3. Format the retrieved context
         context_text = format_docs(results)
         
+        # Extract metrics for logging/debugging
+        distances = results.get('distances', [[]])[0]
+        retrieved_ids = results.get('ids', [[]])[0]
+        metrics = {
+            "num_retrieved": len(retrieved_ids),
+            "distances": distances,
+            "retrieved_ids": retrieved_ids,
+            "min_distance": min(distances) if distances else None,
+            "avg_distance": sum(distances)/len(distances) if distances else None
+        }
+        
         # 4. Generate Final Answer
         if llm:
             chain = (
@@ -116,7 +127,8 @@ async def generate_answer(req: QueryRequest):
                 "user_query": req.question,
                 "retrieved_context": context_text,
                 "generated_answer": final_answer,
-                "llm_used": True
+                "llm_used": True,
+                "metrics": metrics
             }
         else:
             # Fallback if no LLM key
@@ -124,7 +136,8 @@ async def generate_answer(req: QueryRequest):
                 "user_query": req.question,
                 "retrieved_context": context_text,
                 "generated_answer": "NO API KEY SET: Here is what I found in the database. (Please set OLLAMA_API_KEY to enable AI generative answers).\n\n" + context_text,
-                "llm_used": False
+                "llm_used": False,
+                "metrics": metrics
             }
 
     except Exception as e:

@@ -1,0 +1,25 @@
+# --- Core Web & API ---
+fastapi
+uvicorn
+pydantic
+python-multipart
+requests
+
+# --- Database & Storage ---
+sqlalchemy
+psycopg2-binary
+chromadb
+faiss-cpu
+numpy
+
+# --- AI & LLM Integration ---
+groq
+ollama
+sentence-transformers
+langchain-core
+langchain-ollama
+langgraph
+
+# --- Data & Utilities ---
+python-dotenv
+pandas

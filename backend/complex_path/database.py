@@ -6,7 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Use SQLite as a fallback if PostgreSQL is not configured
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./it_tickets.db")
+# Always resolve to backend/complex_path/it_tickets.db regardless of where the script runs from
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_DB_PATH = os.path.join(CURRENT_DIR, "it_tickets.db")
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}")
 
 # For PostgreSQL, use psycopg2-binary
 if DATABASE_URL.startswith("postgresql"):
