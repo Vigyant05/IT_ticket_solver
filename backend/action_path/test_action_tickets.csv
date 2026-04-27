@@ -1,0 +1,11 @@
+ticket_text,intent
+"Reset my password",Action
+"I am trying to work from home but my GlobalProtect VPN keeps disconnecting every 5 minutes. I have already restarted my computer but it didn't help. Can you please look into this?",Action
+"Office wifi is down on 3rd floor",Action
+"I need to print a very important document for a client meeting in 10 minutes, but the printer in conference room B is showing a 'Toner Low' error and won't print my PDF.",Action
+"Can't access my email",Action
+"Please grant me read access to the shared marketing drive. My manager approved it yesterday but I still get an access denied error when clicking the link.",Action
+"My laptop is running very slow",Action
+"My C: drive is almost completely full. I have tried deleting temporary files and emptying the recycling bin, but it still says I only have 200MB left. Is there a way to allocate more storage or clean it up safely?",Action
+"Unlock account please",Action
+"I need Adobe Premiere Pro installed on my workstation for a new video editing project. The standard creative cloud installer is requiring administrator permissions.",Action

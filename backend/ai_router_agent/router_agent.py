@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
-from ollama import Client
+from groq import Groq
 
 # ---------------------------------------------------------------------------
 # Configuration — loaded from .env in the same directory
@@ -31,12 +31,12 @@ from ollama import Client
 _ENV_PATH = Path(__file__).resolve().parent / ".env"
 load_dotenv(_ENV_PATH)
 
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY")
-MODEL_ID = "qwen3.5"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL_ID = "llama-3.1-8b-instant"
 
-if not OLLAMA_API_KEY:
+if not GROQ_API_KEY:
     raise RuntimeError(
-        f"OLLAMA_API_KEY is not set. "
+        f"GROQ_API_KEY is not set. "
         f"Please define it in {_ENV_PATH} or as an environment variable."
     )
 
@@ -126,34 +126,32 @@ def route_to_human_expert(ticket: str) -> None:
 IntentLabel = Literal["FAQ", "Action", "Complex"]
 
 
-def _build_client() -> Client:
-    """Initialise the Ollama Cloud client."""
-    client = Client(
-        host="https://ollama.com",
-        headers={"Authorization": f"Bearer {OLLAMA_API_KEY}"},
-    )
-    logger.info("Ollama Cloud client initialized with model: %s", MODEL_ID)
+def _build_client() -> Groq:
+    """Initialise the Groq LPU client."""
+    client = Groq(api_key=GROQ_API_KEY)
+    logger.info("Groq LPU client initialized with model: %s", MODEL_ID)
     return client
 
 
-def classify_ticket(client: Client, ticket: str) -> IntentLabel:
+def classify_ticket(client: Groq, ticket: str) -> IntentLabel:
     """
-    Send a ticket to the Ollama Cloud model and return the classified intent.
+    Send a ticket to the Groq model and return the classified intent.
 
     Falls back to ``"Complex"`` if the API call fails or the response
     cannot be parsed — ensuring that ambiguous tickets always reach a
     human expert.
     """
     try:
-        response = client.chat(
+        response = client.chat.completions.create(
             model=MODEL_ID,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": ticket},
             ],
-            format="json",
+            response_format={"type": "json_object"},
+            temperature=0.1,
         )
-        raw_text = response.message.content.strip()
+        raw_text = response.choices[0].message.content.strip()
         logger.debug("Raw model response: %s", raw_text)
 
         payload: dict = json.loads(raw_text)
@@ -173,11 +171,11 @@ def classify_ticket(client: Client, ticket: str) -> IntentLabel:
         return "Complex"
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("Ollama Cloud API call failed: %s", exc)
+        logger.error("Groq API call failed: %s", exc)
         return "Complex"
 
 
-def route_ticket(client: Client, ticket: str) -> IntentLabel:
+def route_ticket(client: Groq, ticket: str) -> IntentLabel:
     """Classify a ticket and dispatch it to the appropriate handler."""
     intent = classify_ticket(client, ticket)
 
@@ -211,7 +209,7 @@ _TEST_TICKETS: list[tuple[str, str]] = [
 
 
 def _run_test_suite(
-    client: Client,
+    client: Groq,
     tickets: list[tuple[str, str, str | None]],
     label: str = "Test Mode",
 ) -> None:
