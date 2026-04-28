@@ -65,3 +65,9 @@ env/
 /.pnp
 .pnp.js
 
+# Frontend specific
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+coverage/
