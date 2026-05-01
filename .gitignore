@@ -71,3 +71,9 @@ out/
 .turbo/
 *.tsbuildinfo
 coverage/
+
+# Local databases
+backend/complex_path/it_tickets.db
+
+# Vector database artifacts
+backend/rag_path/vector_db/
