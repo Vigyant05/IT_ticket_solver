@@ -23,7 +23,9 @@
       "@admin/*": ["./admin/*"],
       "@employees/*": ["./employees/*"],
       "@user/*": ["./user/*"],
-      "@login/*": ["./login/*"]
+      "@login/*": ["./login/*"],
+      "@app/*": ["./app/*"],
+      "@lib/*": ["./lib/*"]
     }
   },
   "include": [

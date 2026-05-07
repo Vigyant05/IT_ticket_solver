@@ -16,14 +16,14 @@ export function StatsRow() {
       valueClass: 'text-3xl font-bold text-foreground',
     },
     {
-      label: 'AVG. RESOLUTION',
-      value: stats?.avgResolution ?? '—',
+      label: 'TOTAL TICKETS',
+      value: stats?.totalTickets ?? '—',
       icon: Clock,
       className: 'bg-card border-border',
       valueClass: 'text-3xl font-bold text-foreground',
     },
     {
-      label: 'CUSTOMER CSAT',
+      label: 'RESOLUTION RATE',
       value: stats ? `${stats.customerCsat}%` : '—',
       icon: ThumbsUp,
       className: 'bg-card border-border',

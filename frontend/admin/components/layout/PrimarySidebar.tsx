@@ -10,21 +10,29 @@ import {
   Moon,
   Sun,
   Cpu,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@admin/lib/utils';
 import { useTicketStore } from '@admin/store/ticketStore';
+import { useAuth } from '@app/auth/AuthContext';
+import { toast } from 'sonner';
 
 const navItems = [
   { label: 'Tickets', href: '/admin/tickets', icon: LayoutDashboard },
-  { label: 'Chatbot', href: '/admin/chatbot', icon: MessageSquare },
+  { label: 'Messaging', href: '/admin/chatbot', icon: MessageSquare },
   { label: 'Insights', href: '/admin/insights', icon: BarChart3 },
   { label: 'Employees', href: '/admin/employees', icon: Users },
 ];
 
-
 export function PrimarySidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTicketStore();
+  const { logout, user } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+  };
 
   return (
     <aside className={cn(
@@ -32,7 +40,7 @@ export function PrimarySidebar() {
       theme === 'dark' ? "bg-[#1f212a] text-muted-foreground" : "bg-[#353744] text-gray-400"
     )}>
       {/* Logo */}
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer">
+      <div className="w-8 h-8 rounded-lg bg-primary flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer hover:opacity-90 transition-opacity">
         <Cpu size={18} />
       </div>
 
@@ -52,7 +60,7 @@ export function PrimarySidebar() {
               )}
             >
               {active && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
               )}
               <Icon size={20} className={active ? 'text-white' : ''} />
               <span className="text-[10px] font-medium leading-none">{label}</span>
@@ -72,10 +80,19 @@ export function PrimarySidebar() {
             {theme === 'dark' ? 'Light' : 'Dark'}
           </span>
         </button>
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-1.5 py-3 w-full transition-colors hover:text-red-400 text-muted-foreground"
+          title="Logout"
+        >
+          <LogOut size={20} />
+          <span className="text-[10px] font-medium leading-none">Logout</span>
+        </button>
         {/* Profile Avatar Placeholder */}
         <div className="mt-2 py-3 w-full flex items-center justify-center">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 border-2 border-[#353744] shadow-sm flex items-center justify-center text-white text-[10px] font-bold">
-            IT
+            {user?.name?.charAt(0) || 'A'}
           </div>
         </div>
       </div>

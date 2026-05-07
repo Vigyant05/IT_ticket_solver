@@ -6,7 +6,8 @@ import { StatusBadge } from './StatusBadge';
 import { formatTimeAgo, cn } from '@admin/lib/utils';
 import { useTicketStore } from '@admin/store/ticketStore';
 import { toast } from 'sonner';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Trash2, Loader2 } from 'lucide-react';
+import { useDeleteTicket } from '@admin/hooks/useTickets';
 
 const STATUS_OPTIONS: { label: string; value: Ticket['status'] }[] = [
   { label: 'Critical', value: 'critical' },
@@ -57,8 +58,24 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
   const updateTicketStatus = useTicketStore((s) => s.updateTicketStatus);
   const removeNewFlag = useTicketStore((s) => s.removeNewFlag);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isSliding, setIsSliding] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { mutate: deleteTicket, isPending: isDeleting } = useDeleteTicket();
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this ticket?')) {
+      deleteTicket(ticket.id, {
+        onSuccess: () => {
+          toast.success(`Ticket ${ticket.ticketNumber} deleted successfully`);
+        },
+        onError: () => {
+          toast.error('Failed to delete ticket');
+        }
+      });
+    }
+  };
 
   // Slide-in animation for new tickets
   useEffect(() => {
@@ -104,12 +121,19 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
   );
 
   return (
+    <>
     <tr
+      onClick={(e) => {
+        // Prevent expanding if clicking the status dropdown
+        if (menuRef.current && menuRef.current.contains(e.target as Node)) return;
+        setIsExpanded(!isExpanded);
+      }}
       className={cn(
-        'group border-b border-border/30 hover:bg-muted/30 transition-all duration-200',
+        'group border-b border-border/30 hover:bg-muted/30 transition-all duration-200 cursor-pointer',
         ticket.isNew || isSliding
           ? 'animate-slideInRight'
-          : 'opacity-100'
+          : 'opacity-100',
+        isExpanded && 'bg-muted/30'
       )}
       style={{
         animationDelay: ticket.isNew ? '0ms' : `${index * 40}ms`,
@@ -130,12 +154,16 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
 
       {/* Subject */}
       <td className="px-4 py-4 max-w-[240px]">
-        <p className="text-sm font-medium text-blue-400 hover:text-blue-300 cursor-pointer leading-snug line-clamp-2 transition-colors">
-          {ticket.subject}
+        <p className="text-sm font-medium text-blue-400 hover:text-blue-300 cursor-pointer leading-snug transition-colors flex items-center gap-2">
+          TKT-{ticket.id.padStart(4, '0')}
+          {ticket.pipelinePath && (
+            <span className="bg-blue-500/10 text-blue-400 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+              {ticket.pipelinePath}
+            </span>
+          )}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Ticket {ticket.ticketNumber} •{' '}
-          <span className="text-muted-foreground/70">{ticket.category}</span>
+        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1" title={ticket.subject}>
+          {ticket.subject}
         </p>
       </td>
 
@@ -189,5 +217,43 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
         <p className="text-sm text-muted-foreground">{formatTimeAgo(ticket.updatedAt)}</p>
       </td>
     </tr>
+    {isExpanded && (
+      <tr className="bg-muted/10 border-b border-border/30">
+        <td colSpan={5} className="p-0">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8 text-sm animate-in slide-in-from-top-2">
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Original Ticket Details</h4>
+              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {ticket.description || 'No description provided.'}
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-foreground flex items-center gap-2">
+                  Resolution & Output
+                  {ticket.pipelinePath && (
+                    <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                      {ticket.pipelinePath} Path
+                    </span>
+                  )}
+                </h4>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-red-500 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                >
+                  {isDeleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                  Delete Ticket
+                </button>
+              </div>
+              <div className="bg-background/50 border border-border/50 rounded-lg p-3 text-muted-foreground whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">
+                {ticket.resolutionNotes || 'No resolution notes yet.'}
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    )}
+    </>
   );
 }

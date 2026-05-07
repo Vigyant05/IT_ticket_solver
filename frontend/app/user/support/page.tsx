@@ -11,10 +11,21 @@ import {
   Ticket,
   HelpCircle,
   Mic,
+  Loader2,
+  Send,
+  Search,
+  Bell,
+  RefreshCw,
+  X,
 } from 'lucide-react';
 import { cn } from '@user/lib/utils';
 import { useUserStore, Message } from '@user/store/userStore';
 import { toast } from 'sonner';
+import { ProtectedRoute } from '@app/auth/ProtectedRoute';
+import { useAuth } from '@app/auth/AuthContext';
+import { useSearchParams } from 'next/navigation';
+import { submitTicketToPipeline, fetchMessages, sendMessage, fetchTicket } from '@lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // ── Frequent Solutions accordion data ──────────────────────────────────────
 const FAQ_ITEMS = [
@@ -142,7 +153,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   if (isUser) {
     return (
       <div className="flex gap-3 max-w-[80%] ml-auto justify-end">
-        <div className="bg-[#3b637b] dark:bg-[#2e576e] p-3.5 rounded-xl rounded-tr-sm text-white text-[13px] leading-relaxed shadow-[0px_4px_12px_rgba(59,99,123,0.18)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)]">
+        <div className="bg-[#3b637b] dark:bg-[#2e576e] p-3.5 rounded-xl rounded-tr-sm text-white text-[13px] leading-relaxed shadow-[0px_4px_12px_rgba(59,99,123,0.18)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)] whitespace-pre-wrap">
           {msg.content}
           <div className="text-[10px] text-white/60 font-semibold tracking-wider uppercase mt-2">
             {msg.timestamp}
@@ -161,7 +172,7 @@ function ChatMessage({ msg }: { msg: Message }) {
         <Bot size={16} />
       </div>
       <div>
-        <div className="bg-[#f6f5f5] dark:bg-[#252735] p-3.5 rounded-xl rounded-tl-sm text-[#323235] dark:text-[#e2e4f0] text-[13px] leading-relaxed shadow-sm dark:shadow-none dark:border dark:border-white/5">
+        <div className="bg-[#f6f5f5] dark:bg-[#252735] p-3.5 rounded-xl rounded-tl-sm text-[#323235] dark:text-[#e2e4f0] text-[13px] leading-relaxed shadow-sm dark:shadow-none dark:border dark:border-white/5 whitespace-pre-wrap">
           {msg.content}
           <div className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold tracking-wider uppercase mt-2">
             {msg.timestamp}
@@ -184,10 +195,13 @@ function ChatMessage({ msg }: { msg: Message }) {
   );
 }
 
-export default function SupportPage() {
-  const { messages, addMessage } = useUserStore();
+function SupportPageContent() {
+  const { messages, addMessage, setTickets, tickets } = useUserStore();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [input, setInput] = useState('');
   const [openFaq, setOpenFaq] = useState<string | null>('faq-2');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -196,7 +210,7 @@ export default function SupportPage() {
     }
   }, [messages]);
 
-  const handleRaiseTicket = () => {
+  const handleRaiseTicket = async () => {
     const text = input.trim();
     if (!text) {
       toast.error('Please describe your issue first.');
@@ -211,18 +225,45 @@ export default function SupportPage() {
     };
     addMessage(userMsg);
     setInput('');
+    setIsSubmitting(true);
 
-    const ticketId = 'TKT-' + Math.floor(4900 + Math.random() * 100);
-    toast.success(`Ticket ${ticketId} raised successfully!`, {
-      description: 'Our team will get back to you shortly.',
-    });
+    try {
+      // Submit through the full AI pipeline (classify → Action / FAQ / Complex)
+      const ticketId = `TKT-${Date.now()}`;
+      const result = await submitTicketToPipeline({
+        ticket_id: ticketId,
+        ticket_text: text,
+        requester_name: user?.name || 'Unknown User',
+      });
 
-    // Simulate AI acknowledgement
-    setTimeout(() => {
+      const dbId = result.db_ticket_id ? `#${result.db_ticket_id}` : ticketId;
+      const intent = result.intent_classified || 'Unknown';
+      const resolution = result.resolution || {};
+      const path = resolution.path || 'Unknown';
+
+      toast.success(`Ticket ${dbId} raised & routed!`, {
+        description: `Classified as: ${intent} → ${path} Path`,
+      });
+
+      // Build AI response message based on routing result
+      let aiText = '';
+      if (path === 'Action') {
+        const answer = resolution.answer || 'It should be resolved automatically shortly.';
+        aiText = `Your ticket (${dbId}) has been classified as an Action request and forwarded to our automation workflow.\n\nSystem Output:\n${answer}`;
+      } else if (path === 'FAQ') {
+        const answer = resolution.answer || 'Please check our Frequent Solutions panel for guidance.';
+        aiText = `Your ticket (${dbId}) was matched against our knowledge base:\n\n${answer}`;
+      } else if (path === 'Complex') {
+        const agent = resolution.assigned_agent || 'a specialist';
+        aiText = `Your ticket (${dbId}) has been assigned to ${agent} from our expert team. You can now chat with them directly in the "Messaging" tab.`;
+      } else {
+        aiText = `Your ticket (${dbId}) has been received and our team will review it shortly.`;
+      }
+
       const aiMsg: Message = {
         id: `m${Date.now() + 1}`,
         role: 'assistant',
-        content: `Your ticket (${ticketId}) has been raised. I'm analyzing your request and will provide a detailed response shortly. In the meantime, you may want to check our Frequent Solutions panel.`,
+        content: aiText,
         timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         actions: [
           { label: 'View Ticket', variant: 'primary' },
@@ -230,11 +271,30 @@ export default function SupportPage() {
         ],
       };
       addMessage(aiMsg);
-    }, 1200);
+    } catch (error) {
+      toast.error('Failed to raise ticket. Please try again.');
+      const errMsg: Message = {
+        id: `m${Date.now() + 1}`,
+        role: 'assistant',
+        content: 'Sorry, we could not process your ticket right now. Please try again or contact support directly.',
+        timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      };
+      addMessage(errMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#f8f7f9] dark:bg-[#12131a] text-[#323235] dark:text-[#f5f6fa]">
+      {/* Show user info in header */}
+      {user && (
+        <div className="px-6 py-2 bg-primary/5 border-b border-primary/10">
+          <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">
+            Logged in as: {user.name} ({user.email})
+          </p>
+        </div>
+      )}
 
       {/* ── Main content ────────────────────────────── */}
       <div className="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -272,16 +332,24 @@ export default function SupportPage() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleRaiseTicket()}
-                    placeholder="Type your issue here..."
-                    className="flex-1 bg-[#f6f3f4] dark:bg-[#252735] rounded-lg px-4 py-2 text-[13px] text-[#323235] dark:text-[#e2e4f0] placeholder:text-[#b2b1b5] dark:placeholder:text-[#a0a5b5] border border-transparent dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && input.trim()) {
+                        handleRaiseTicket();
+                      }
+                    }}
+                    placeholder="Type your issue here to raise a ticket..."
+                    className="flex-1 bg-[#f6f3f4] dark:bg-[#252735] rounded-lg px-4 py-2 text-[13px] text-[#323235] dark:text-[#e2e4f0] placeholder:text-[#b2b1b5] dark:placeholder:text-[#a0a5b5] border border-transparent dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                   <button
                     onClick={handleRaiseTicket}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3b637b] dark:bg-[#2e576e] hover:bg-[#2e576e] dark:hover:bg-[#24465a] text-white text-[12px] font-bold transition-colors shadow-sm shrink-0"
+                    disabled={isSubmitting || !input.trim()}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:opacity-90 text-white text-[12px] font-bold transition-all shadow-sm shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    <Ticket size={14} />
-                    Raise Ticket
+                    {isSubmitting ? (
+                      <><Loader2 size={14} className="animate-spin" /> Routing...</>
+                    ) : (
+                      <><Ticket size={14} /> Raise Ticket</>
+                    )}
                   </button>
                 </div>
               </div>
@@ -318,17 +386,17 @@ export default function SupportPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
             {/* Technical Specs */}
             <div className="bg-white dark:bg-[#1a1b24] rounded-xl p-5 shadow-[0px_4px_24px_rgba(13,60,82,0.05)] dark:shadow-none dark:border dark:border-white/5 flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-[#ecf4f8] dark:bg-[#1e2532] flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae] shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <BookOpen size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-[14px] font-bold text-[#3b637b] dark:text-[#5a8cae] mb-1">
+                <h4 className="text-[14px] font-bold text-primary mb-1">
                   Technical Specs
                 </h4>
                 <p className="text-[12px] text-[#5f5f62] dark:text-[#a0a5b5] leading-relaxed mb-2.5">
                   Detailed architectural explanations and system requirements for common tickets.
                 </p>
-                <button className="text-[11px] font-bold tracking-wider text-[#3b637b] dark:text-[#5a8cae] hover:underline flex items-center gap-1 uppercase">
+                <button className="text-[11px] font-bold tracking-wider text-primary hover:underline flex items-center gap-1 uppercase">
                   Download PDF Reference
                   <ExternalLink size={11} />
                 </button>
@@ -337,17 +405,17 @@ export default function SupportPage() {
 
             {/* Video Tutorials */}
             <div className="bg-white dark:bg-[#1a1b24] rounded-xl p-5 shadow-[0px_4px_24px_rgba(13,60,82,0.05)] dark:shadow-none dark:border dark:border-white/5 flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-[#ecf4f8] dark:bg-[#1e2532] flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae] shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                 <Video size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-[14px] font-bold text-[#3b637b] dark:text-[#5a8cae] mb-1">
+                <h4 className="text-[14px] font-bold text-primary mb-1">
                   Video Tutorials
                 </h4>
                 <p className="text-[12px] text-[#5f5f62] dark:text-[#a0a5b5] leading-relaxed mb-2.5">
                   Visual walkthroughs for common Ledger tasks and node configurations.
                 </p>
-                <button className="text-[11px] font-bold tracking-wider text-[#3b637b] dark:text-[#5a8cae] hover:underline flex items-center gap-1 uppercase">
+                <button className="text-[11px] font-bold tracking-wider text-primary hover:underline flex items-center gap-1 uppercase">
                   Watch Library Sessions
                   <ExternalLink size={11} />
                 </button>
@@ -358,5 +426,13 @@ export default function SupportPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SupportPage() {
+  return (
+    <ProtectedRoute requiredRole="User">
+      <SupportPageContent />
+    </ProtectedRoute>
   );
 }

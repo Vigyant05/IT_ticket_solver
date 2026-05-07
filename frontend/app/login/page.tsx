@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@login/lib/utils';
 import { User, Shield, Briefcase, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@app/auth/AuthContext';
 
 type Role = 'User' | 'Employee' | 'Admin';
 
@@ -15,17 +17,33 @@ const roles: { id: Role; icon: React.ElementType; label: string }[] = [
 
 export default function LoginPage() {
   const [selectedRole, setSelectedRole] = useState<Role>('User');
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !password) {
-      toast.error('Please enter both User ID and Password');
+    if (!email || !password) {
+      toast.error('Please enter both Email and Password');
       return;
     }
-    toast.success(`Logging in as ${selectedRole}...`);
-    // Redirect logic would go here
+
+    setIsLoading(true);
+    const success = await login(email, password, selectedRole);
+
+    if (success) {
+      // Redirect based on role
+      if (selectedRole === 'Admin') {
+        router.push('/admin/tickets');
+      } else if (selectedRole === 'Employee') {
+        router.push('/employees/resolve');
+      } else {
+        router.push('/user/support');
+      }
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -33,7 +51,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md px-8 py-12 flex flex-col items-center">
         {/* Project Title */}
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-12 text-center text-[#1e2a35] font-manrope">
-          Architectural Ledger
+          IT Ticket Solver
         </h1>
 
         {/* Role Selection */}
@@ -70,14 +88,15 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="w-full flex flex-col gap-5">
           <div className="space-y-1.5">
             <label className="text-[12px] font-bold text-[#22232b] uppercase tracking-wider ml-1">
-              User ID
+              Email
             </label>
             <input
-              type="text"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              placeholder="Enter your ID"
-              className="w-full px-4 py-3.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white text-sm text-[#1e2a35] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#22232b]/40 focus:border-transparent transition-all"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              disabled={isLoading}
+              className="w-full px-4 py-3.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white text-sm text-[#1e2a35] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#22232b]/40 focus:border-transparent transition-all disabled:opacity-50"
             />
           </div>
 
@@ -90,22 +109,24 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white text-sm text-[#1e2a35] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#22232b]/40 focus:border-transparent transition-all"
+              disabled={isLoading}
+              className="w-full px-4 py-3.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white text-sm text-[#1e2a35] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#22232b]/40 focus:border-transparent transition-all disabled:opacity-50"
             />
           </div>
 
           <button
             type="submit"
-            className="group mt-4 w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-[#22232b] text-white text-[13px] font-bold uppercase tracking-wider hover:bg-[#1a1b22] transition-colors shadow-lg shadow-[#22232b]/20"
+            disabled={isLoading}
+            className="group mt-4 w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-[#22232b] text-white text-[13px] font-bold uppercase tracking-wider hover:bg-[#1a1b22] transition-colors shadow-lg shadow-[#22232b]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Login
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            {isLoading ? 'Logging in...' : 'Login'}
+            {!isLoading && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <p className="text-xs font-medium text-zinc-400">
-            Secure connection established.
+            Default password: 12345
           </p>
         </div>
       </div>

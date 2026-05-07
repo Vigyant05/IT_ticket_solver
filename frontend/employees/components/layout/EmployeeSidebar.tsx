@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+  LayoutDashboard,
   Headphones,
   Clock,
   Moon,
@@ -10,19 +11,30 @@ import {
   Cpu,
   Ticket,
   User,
+  LogOut,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@employees/lib/utils';
 import { useEmployeeStore } from '@employees/store/employeeStore';
+import { useAuth } from '@app/auth/AuthContext';
+import { toast } from 'sonner';
 
 const navItems = [
-  { label: 'Resolve Tickets', href: '/employees/resolve', icon: Headphones },
-  { label: 'Active Tickets', href: '/employees/active', icon: Ticket },
-  { label: 'Resolved History', href: '/employees/history', icon: Clock },
+  { label: 'Dashboard', href: '/employees/dashboard', icon: LayoutDashboard },
+  { label: 'Messaging', href: '/employees/chatbot', icon: MessageSquare },
+  { label: 'Resolve', href: '/employees/resolve', icon: Headphones },
+  { label: 'History', href: '/employees/history', icon: Clock },
 ];
 
 export function EmployeeSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useEmployeeStore();
+  const { logout, user } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+  };
 
   return (
     <aside
@@ -34,7 +46,7 @@ export function EmployeeSidebar() {
       )}
     >
       {/* Logo */}
-      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer">
+      <div className="w-8 h-8 rounded-lg bg-primary flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer hover:opacity-90 transition-opacity">
         <Cpu size={18} />
       </div>
 
@@ -59,7 +71,7 @@ export function EmployeeSidebar() {
               )}
             >
               {active && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
               )}
               <Icon size={20} className={active ? 'text-white' : ''} />
               <span className="text-[9px] font-medium leading-none text-center px-1">{label}</span>
@@ -81,11 +93,21 @@ export function EmployeeSidebar() {
           title="Employee Profile"
         >
           {(pathname === '/employees/profile' || pathname.startsWith('/employees/profile/')) && (
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500 rounded-r-full" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
           )}
           <User size={18} className={pathname === '/employees/profile' ? 'text-white' : ''} />
           <span className="text-[9px] font-medium leading-none text-center px-1">Profile</span>
         </Link>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex flex-col items-center gap-1.5 py-3 w-full transition-colors hover:text-red-400 text-muted-foreground"
+          title="Logout"
+        >
+          <LogOut size={18} />
+          <span className="text-[9px] font-medium leading-none">Logout</span>
+        </button>
 
         {/* Theme toggle */}
         <button
@@ -98,6 +120,12 @@ export function EmployeeSidebar() {
             {theme === 'dark' ? 'Light' : 'Dark'}
           </span>
         </button>
+        {/* Profile Avatar */}
+        <div className="mt-1 py-2 w-full flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 border-2 border-[#353744] shadow-sm flex items-center justify-center text-white text-[9px] font-bold">
+            {user?.name?.charAt(0) || 'E'}
+          </div>
+        </div>
       </div>
     </aside>
   );

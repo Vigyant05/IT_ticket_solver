@@ -1,27 +1,62 @@
 'use client';
 
-import { useState } from 'react';
-import { User, Mail, Briefcase, Tag, Save, Zap, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Mail, Briefcase, Tag, Zap, AlertCircle, Shield, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ProtectedRoute } from '@app/auth/ProtectedRoute';
+import { useAuth } from '@app/auth/AuthContext';
+import { fetchEmployee } from '@lib/api';
 
-export default function ProfilePage() {
-  const [formData, setFormData] = useState({
-    name: 'Jane Doe',
-    email: 'jane.doe@architectural-ledger.com',
-    role: 'L2 Support Engineer',
-    category: 'Hardware Diagnostics',
-    specialization: 'Hardware Wallets, Sync Issues',
-    maxTickets: '5',
-  });
+interface EmployeeData {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  team: string;
+  expertise_tags: string[];
+  skill_level: number;
+  current_load: number;
+  availability_status: boolean;
+  avg_resolution_time: number;
+  priority_handling_capability: string;
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+function ProfileContent() {
+  const { user } = useAuth();
+  const [empData, setEmpData] = useState<EmployeeData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = () => {
-    toast.success('Profile updated successfully!');
-  };
+  useEffect(() => {
+    async function loadProfile() {
+      if (!user?.id) return;
+      try {
+        const data = await fetchEmployee(user.id);
+        setEmpData(data);
+      } catch (error) {
+        console.error('Failed to load profile', error);
+        toast.error('Failed to load profile data');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProfile();
+  }, [user?.id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center h-screen bg-[#f8f7f9] dark:bg-[#12131a]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#3b637b]" />
+      </div>
+    );
+  }
+
+  if (!empData) {
+    return (
+      <div className="flex-1 flex items-center justify-center h-screen bg-[#f8f7f9] dark:bg-[#12131a]">
+        <p className="text-[#5f5f62]">No profile data available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#f8f7f9] dark:bg-[#12131a] text-[#323235] dark:text-[#f5f6fa]">
@@ -33,7 +68,7 @@ export default function ProfilePage() {
               Employee Profile
             </h1>
             <p className="text-[14px] text-[#5f5f62] dark:text-[#a0a5b5] mt-1">
-              Manage your personal information and support settings.
+              Your personal information and support settings.
             </p>
           </div>
 
@@ -41,23 +76,20 @@ export default function ProfilePage() {
             {/* Avatar Section */}
             <div className="p-8 border-b border-[#f0eff0] dark:border-white/5 flex items-center gap-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#f8f7f9] dark:border-[#12131a] bg-gray-200 dark:bg-gray-700 shadow-sm">
-                  <img src="https://i.pravatar.cc/150?img=11" alt="Profile" className="w-full h-full object-cover" />
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#f8f7f9] dark:border-[#12131a] bg-gradient-to-tr from-[#3b637b] to-[#5a8cae] shadow-sm flex items-center justify-center text-white text-3xl font-bold">
+                  {empData.name.charAt(0)}
                 </div>
-                <button className="absolute bottom-0 right-0 bg-[#3b637b] dark:bg-[#2e576e] text-white p-2 rounded-full shadow-md hover:bg-[#2e576e] dark:hover:bg-[#467393] transition-colors">
-                  <User size={14} />
-                </button>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#1e2a35] dark:text-[#e8edf5]">{formData.name}</h2>
+                <h2 className="text-2xl font-bold text-[#1e2a35] dark:text-[#e8edf5]">{empData.name}</h2>
                 <div className="flex items-center gap-2 mt-1.5 text-[#5f5f62] dark:text-[#a0a5b5] text-[13px] font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  Active - Receiving Tickets
+                  <span className={`w-2 h-2 rounded-full ${empData.availability_status ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                  {empData.availability_status ? 'Active - Receiving Tickets' : 'Busy - At Capacity'}
                 </div>
               </div>
             </div>
 
-            {/* Form Details */}
+            {/* Details */}
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Full Name */}
@@ -65,13 +97,9 @@ export default function ProfilePage() {
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
                     <User size={14} /> Full Name
                   </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0]"
-                  />
+                  <div className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] text-[#323235] dark:text-[#e2e4f0]">
+                    {empData.name}
+                  </div>
                 </div>
 
                 {/* Email */}
@@ -79,13 +107,9 @@ export default function ProfilePage() {
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
                     <Mail size={14} /> Email Address
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0]"
-                  />
+                  <div className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] text-[#323235] dark:text-[#e2e4f0]">
+                    {empData.email}
+                  </div>
                 </div>
 
                 {/* Role */}
@@ -93,88 +117,80 @@ export default function ProfilePage() {
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
                     <Briefcase size={14} /> Title / Role
                   </label>
-                  <input
-                    type="text"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0]"
-                  />
+                  <div className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] text-[#323235] dark:text-[#e2e4f0]">
+                    {empData.role}
+                  </div>
                 </div>
 
-                {/* Category */}
+                {/* Team */}
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
-                    <Tag size={14} /> Support Category
+                    <Shield size={14} /> Team
                   </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0] appearance-none"
-                  >
-                    <option value="Hardware Diagnostics">Hardware Diagnostics</option>
-                    <option value="Software & Sync">Software & Sync</option>
-                    <option value="Network Infrastructure">Network Infrastructure</option>
-                    <option value="Account & Billing">Account & Billing</option>
-                  </select>
+                  <div className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] text-[#323235] dark:text-[#e2e4f0]">
+                    {empData.team}
+                  </div>
                 </div>
               </div>
 
               <hr className="border-[#f0eff0] dark:border-white/5 my-6" />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Specialization */}
+                {/* Expertise Tags */}
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
-                    <Zap size={14} /> Specializations
+                    <Zap size={14} /> Expertise Areas
                   </label>
-                  <input
-                    type="text"
-                    name="specialization"
-                    value={formData.specialization}
-                    onChange={handleChange}
-                    placeholder="e.g. Firmware updates, Subnet routing"
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0]"
-                  />
-                  <p className="text-[11px] text-[#8e8d91] dark:text-[#888c99]">Comma-separated list of your technical expertise.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {empData.expertise_tags.length > 0 ? (
+                      empData.expertise_tags.map((tag) => (
+                        <span key={tag} className="px-3 py-1.5 bg-[#e8f1f5] dark:bg-[#1e2532] text-[#3b637b] dark:text-[#5a8cae] rounded-lg text-[12px] font-semibold">
+                          {tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[13px] text-[#a0a5b5]">No expertise tags assigned</span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Max Tickets */}
+                {/* Stats */}
                 <div className="space-y-2">
                   <label className="text-[12px] font-bold tracking-wide uppercase text-[#5f5f62] dark:text-[#a0a5b5] flex items-center gap-1.5">
-                    <AlertCircle size={14} /> Max Concurrent Tickets
+                    <AlertCircle size={14} /> Performance Stats
                   </label>
-                  <input
-                    type="number"
-                    name="maxTickets"
-                    value={formData.maxTickets}
-                    onChange={handleChange}
-                    min="1"
-                    max="20"
-                    className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 transition-shadow text-[#323235] dark:text-[#e2e4f0]"
-                  />
-                  <p className="text-[11px] text-[#8e8d91] dark:text-[#888c99]">Maximum number of active tickets you can handle at once.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.skill_level}/5</p>
+                      <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Skill Level</p>
+                    </div>
+                    <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.current_load}</p>
+                      <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Current Load</p>
+                    </div>
+                    <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.priority_handling_capability}</p>
+                      <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Priority Cap.</p>
+                    </div>
+                    <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
+                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.avg_resolution_time || 0}h</p>
+                      <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Avg Resolution</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Actions */}
-              <div className="pt-6 flex justify-end gap-3">
-                <button className="px-5 py-2.5 rounded-lg font-bold text-[13px] text-[#323235] dark:text-[#e2e4f0] bg-white dark:bg-[#1a1b24] hover:bg-[#f0f4f6] dark:hover:bg-[#252735] border border-[#e0dede] dark:border-white/10 transition-colors">
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-5 py-2.5 rounded-lg font-bold text-[13px] text-white bg-[#3b637b] dark:bg-[#2e576e] hover:bg-[#2e576e] dark:hover:bg-[#24465a] shadow-sm flex items-center gap-2 transition-colors"
-                >
-                  <Save size={16} />
-                  Save Changes
-                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <ProtectedRoute requiredRole="Employee">
+      <ProfileContent />
+    </ProtectedRoute>
   );
 }

@@ -31,18 +31,35 @@ def send_ticket_to_n8n(ticket_text, webhook_url):
         response = requests.post(webhook_url, json=payload, headers={"Content-Type": "application/json"})
         response.raise_for_status()
         
-        # Try to parse the response if it returns one
+        n8n_response_text = "Action executed successfully."
         try:
             resp_data = response.json()
-            print(f"Success! n8n responded: {resp_data.get('output', resp_data)}")
+            output_data = resp_data.get('output', resp_data)
+            
+            if isinstance(output_data, dict):
+                # Format the dictionary nicely
+                lines = []
+                if 'action' in output_data: lines.append(f"Action: {output_data['action']}")
+                if 'status' in output_data: lines.append(f"Status: {output_data['status']}")
+                if 'data' in output_data: lines.append(f"Result: {output_data['data']}")
+                if 'logs' in output_data and isinstance(output_data['logs'], list):
+                    lines.append("Logs:")
+                    for log in output_data['logs']:
+                        lines.append(f"- {log}")
+                
+                n8n_response_text = "\n".join(lines) if lines else str(output_data)
+            else:
+                n8n_response_text = str(output_data)
+                
+            print(f"Success! n8n responded: {n8n_response_text}")
         except ValueError:
             print(f"Success! (No JSON returned, status: {response.status_code})")
             
-        return True
+        return True, n8n_response_text
     except requests.exceptions.RequestException as e:
         print(f"Error connecting to n8n workflow: {e}")
         print("Make sure your n8n workflow is running (click 'Execute Workflow' or activate it).")
-        return False
+        return False, str(e)
 
 def process_csv(file_path, webhook_url, max_tickets=None, delay=2.0):
     """Reads tickets from a CSV and sends them one by one to n8n."""
@@ -64,7 +81,7 @@ def process_csv(file_path, webhook_url, max_tickets=None, delay=2.0):
             # The ticket text is usually the first column in your dataset
             ticket_text = row[0]
             
-            success = send_ticket_to_n8n(ticket_text, webhook_url)
+            success, _ = send_ticket_to_n8n(ticket_text, webhook_url)
             count += 1
             
             if max_tickets and count >= max_tickets:

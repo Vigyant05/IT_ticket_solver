@@ -13,12 +13,15 @@ export interface Message {
 
 export interface Ticket {
   id: string;
-  subject: string;
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed' | 'assigned';
   priority: 'low' | 'medium' | 'high' | 'critical';
+  category?: string;
+  subcategory?: string;
+  severity?: number;
+  urgency?: number;
   createdAt: string;
-  updatedAt: string;
-  user: string;
 }
 
 interface EmployeeStore {
@@ -26,91 +29,33 @@ interface EmployeeStore {
   activeTab: 'resolve' | 'history';
   messages: Message[];
   tickets: Ticket[];
+  activeTickets: Ticket[];
+  historyTickets: Ticket[];
+  isLoading: boolean;
+  employeeId: number | null;
 
   setTheme: (theme: 'dark' | 'light') => void;
   toggleTheme: () => void;
   setActiveTab: (tab: 'resolve' | 'history') => void;
   addMessage: (msg: Message) => void;
+  setTickets: (tickets: Ticket[]) => void;
+  setActiveTickets: (tickets: Ticket[]) => void;
+  setHistoryTickets: (tickets: Ticket[]) => void;
+  setLoading: (loading: boolean) => void;
+  setEmployeeId: (id: number | null) => void;
 }
-
-const MOCK_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    role: 'user',
-    content:
-      "Hello, I'm having trouble synchronizing my local vault with the main ledger. I keep getting \"Error 404: Node Unavailable\".",
-    timestamp: '10:35 AM',
-  },
-  {
-    id: 'm2',
-    role: 'assistant',
-    content:
-      'Hello John! "Error 404: Node Unavailable" usually indicates a network gateway timeout. Let me check your current connection status on our end.',
-    timestamp: '10:37 AM',
-  },
-  {
-    id: 'm3',
-    role: 'user',
-    content: "I've tried running diagnostics locally and it says everything is fine on my end.",
-    timestamp: '10:38 AM',
-  },
-];
-
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: 'TKT-4821',
-    subject: 'Node Unavailable Error 404',
-    status: 'in_progress',
-    priority: 'high',
-    createdAt: '2026-04-25T10:24:00Z',
-    updatedAt: '2026-04-26T09:00:00Z',
-    user: 'John Doe',
-  },
-  {
-    id: 'TKT-4790',
-    subject: 'Access Request: Ledger Admin Panel',
-    status: 'resolved',
-    priority: 'medium',
-    createdAt: '2026-04-20T08:00:00Z',
-    updatedAt: '2026-04-22T14:30:00Z',
-    user: 'Alice Smith',
-  },
-  {
-    id: 'TKT-4755',
-    subject: 'Vault sync failure on subnet B',
-    status: 'closed',
-    priority: 'low',
-    createdAt: '2026-04-10T11:00:00Z',
-    updatedAt: '2026-04-12T16:00:00Z',
-    user: 'Bob Johnson',
-  },
-  {
-    id: 'TKT-4710',
-    subject: 'Hardware wallet pairing issue',
-    status: 'resolved',
-    priority: 'medium',
-    createdAt: '2026-04-05T09:00:00Z',
-    updatedAt: '2026-04-07T10:00:00Z',
-    user: 'Eve Davis',
-  },
-  {
-    id: 'TKT-4680',
-    subject: 'Ledger key reset request',
-    status: 'closed',
-    priority: 'low',
-    createdAt: '2026-03-28T12:00:00Z',
-    updatedAt: '2026-03-29T15:00:00Z',
-    user: 'Michael Brown',
-  },
-];
 
 export const useEmployeeStore = create<EmployeeStore>()(
   persist(
     (set) => ({
       theme: 'dark',
       activeTab: 'resolve',
-      messages: MOCK_MESSAGES,
-      tickets: MOCK_TICKETS,
+      messages: [],
+      tickets: [],
+      activeTickets: [],
+      historyTickets: [],
+      isLoading: false,
+      employeeId: null,
 
       setTheme: (theme) => set({ theme }),
       toggleTheme: () =>
@@ -118,6 +63,11 @@ export const useEmployeeStore = create<EmployeeStore>()(
       setActiveTab: (tab) => set({ activeTab: tab }),
       addMessage: (msg) =>
         set((state) => ({ messages: [...state.messages, msg] })),
+      setTickets: (tickets) => set({ tickets }),
+      setActiveTickets: (tickets) => set({ activeTickets: tickets }),
+      setHistoryTickets: (tickets) => set({ historyTickets: tickets }),
+      setLoading: (loading) => set({ isLoading: loading }),
+      setEmployeeId: (id) => set({ employeeId: id }),
     }),
     {
       name: 'employee-portal-store',

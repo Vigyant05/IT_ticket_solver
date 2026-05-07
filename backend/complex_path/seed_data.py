@@ -35,6 +35,10 @@ def seed_data():
         {"id": 23, "name": "Naveen", "email": "naveen@msrit.com", "role": "Penetration Tester", "team": "Security", "expertise": ["vulnerability-scanning", "ethical-hacking"], "skill": 5, "priority": "High"},
         {"id": 24, "name": "Priya", "email": "priya@msrit.com", "role": "Security Engineer", "team": "Security", "expertise": ["siem", "splunk", "firewalls"], "skill": 4, "priority": "High"},
         {"id": 25, "name": "Monisha", "email": "monisha@msrit.com", "role": "Security Analyst", "team": "Security", "expertise": ["soc", "threat-hunting", "ddos-mitigation"], "skill": 4, "priority": "High"},
+        {"id": 26, "name": "Aditi", "email": "aditi@msrit.com", "role": "User", "team": "None", "expertise": [], "skill": 0, "priority": "Low"},
+        {"id": 27, "name": "Kavya", "email": "kavya@msrit.com", "role": "User", "team": "None", "expertise": [], "skill": 0, "priority": "Low"},
+        {"id": 28, "name": "Abhishek", "email": "abhishek@msrit.com", "role": "User", "team": "None", "expertise": [], "skill": 0, "priority": "Low"},
+        {"id": 29, "name": "Admin_System", "email": "admin@msrit.com", "role": "Admin", "team": "Admin", "expertise": [], "skill": 0, "priority": "Low"},
     ]
 
     for data in employees_data:
@@ -56,49 +60,74 @@ def seed_data():
     db.commit()
     print(f"Successfully seeded {len(employees_data)} employees.")
 
-    db.close()
-    return
+    db.commit()
+    print(f"Successfully seeded {len(employees_data)} employees.")
 
-    print("Seeding tickets...")
-    tickets_data = [
-        {"id": 1, "title": "Production ERP System Down", "description": "Our main ERP database (PostgreSQL) is refusing connections. App logs are showing 'Connection Limit Exceeded' errors. This has halted all warehouse operations.", "category": None, "subcategory": None, "severity": None, "urgency": None, "priority_score": None, "status": "open", "assigned_employee_id": None},
-        {"id": 5, "title": "VPN Connection Resetting", "description": "My GlobalProtect VPN disconnects every 10 minutes when working from home. I've tried restarting my router but the issue persists.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 5},
-        {"id": 6, "title": "Suspicious Phishing Email Reported", "description": "Several employees received an email asking for Office 365 credentials from '\n\nit-support@conmpany.com\n'. One user potentially clicked the link.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 3},
-        {"id": 8, "title": "Unable to login to email", "description": "Hi Team, I forgot my Outlook password and I am unable to login since this morning. Please help me reset it.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 5},
-        {"id": 9, "title": "Need MS Project installed", "description": "I need Microsoft Project for planning tasks. It is not available in my system. Please install it.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 1},
-        {"id": 11, "title": "ERP system very slow today", "description": "The finance ERP module is taking more than 2 minutes to load reports. This is affecting our workflow.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 5},
-        {"id": 14, "title": "VPN disconnecting frequently ", "description": "My VPN keeps disconnecting every 10 minutes. I am working remotely and cannot access internal servers reliably.", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 3},
-        {"id": 20, "title": "Pods restarting continuously in production", "description": "Multiple Kubernetes pods are in CrashLoopBackOff state after latest config update", "category": "General Support", "subcategory": "Manual Triage Required", "severity": 3, "urgency": 3, "priority_score": 3.0, "status": "assigned", "assigned_employee_id": 5},
-        {"id": 21, "title": "URGENT HELP NEEDED", "description": "Nothing is working. I cannot access anything and my manager is asking for updates. Please fix this ASAP.", "category": "General Support", "subcategory": "System Access Issue", "severity": 4, "urgency": 5, "priority_score": 4.4, "status": "assigned", "assigned_employee_id": 5},
-        {"id": 22, "title": "Need MS Project installed", "description": "I need Microsoft Project for planning tasks. It is not available in my system. Please install it.", "category": "Application", "subcategory": "Software Installation", "severity": 1, "urgency": 2, "priority_score": 1.4, "status": "assigned", "assigned_employee_id": 7},
-        {"id": 23, "title": "Primary Database server is down", "description": "The primary PostgreSQL database server is not responding. All dependent applications are down.", "category": "Infrastructure", "subcategory": "Server failure", "severity": 5, "urgency": 5, "priority_score": 5.0, "status": "assigned", "assigned_employee_id": 11},
-        {"id": 24, "title": "Not able to connect to server", "description": "Unable to connect to servers", "category": "Infrastructure", "subcategory": "Server Connectivity", "severity": 4, "urgency": 4, "priority_score": 4.0, "status": "assigned", "assigned_employee_id": 12},
+    print("Seeding 25 random tickets...")
+    import random
+    
+    users = db.query(Employee).filter(Employee.role == "User").all()
+    staff = db.query(Employee).filter(Employee.role != "User", Employee.role != "Admin").all()
+    
+    ticket_pool = [
+        {"title": "Docker container failing on AWS", "desc": "My production container is crashing with OOM errors in the US-East-1 region. Need help checking Terraform configs.", "keywords": ["docker", "kubernetes", "aws", "terraform"]},
+        {"title": "VPN access denied", "desc": "Cannot connect to the corporate VPN from my home network. WiFi is working fine.", "keywords": ["vpn", "wifi", "networking"]},
+        {"title": "Outlook password reset", "desc": "Locked out of my Office 365 account. Need a password reset for my email.", "keywords": ["password-reset", "office365", "outlook"]},
+        {"title": "MacBook Pro keyboard issue", "desc": "Several keys on my laptop are not responding. Might be a hardware problem.", "keywords": ["macos", "hardware", "mac-os"]},
+        {"title": "Slow database queries", "desc": "Our PostgreSQL database is extremely slow during peak hours. Need help with indexing.", "keywords": ["postgresql", "postgres", "mysql", "db-failures"]},
+        {"title": "Suspicious email received", "desc": "I received an email asking for my credentials. Looks like phishing.", "keywords": ["phishing", "malware", "security"]},
+        {"title": "Kubernetes Pod crashing", "desc": "The pods in our production cluster are in CrashLoopBackOff state.", "keywords": ["kubernetes", "docker", "gcp"]},
+        {"title": "Printer not working", "desc": "The L3 printer in the main hallway is showing an error code and won't print.", "keywords": ["printers", "hardware"]},
+        {"title": "Nginx configuration error", "desc": "Getting 502 Bad Gateway on the main load balancer.", "keywords": ["nginx", "load-balancing", "ha-proxy"]},
+        {"title": "Data loss on SAN", "desc": "We are unable to access some files on the shared storage server.", "keywords": ["storage", "san", "backups", "data-loss"]},
+        {"title": "SAP portal error", "desc": "Error 404 when trying to access the SAP ERP portal.", "keywords": ["sap", "erp", "data-entry-errors"]},
+        {"title": "Salesforce sync failed", "desc": "The CRM is not syncing with our internal API.", "keywords": ["crm", "salesforce", "api-integration"]},
+        {"title": "Linux server performance", "desc": "The shell scripts are running very slow on the production Linux box.", "keywords": ["linux", "shell-scripting", "performance-tuning"]},
+        {"title": "Zoom meeting issues", "desc": "Microphone not working during Zoom calls on my Mac.", "keywords": ["zoom", "teams", "slack", "mac-os"]},
+        {"title": "New employee onboarding", "desc": "Need to setup permissions and active directory access for a new hire.", "keywords": ["active-directory", "user-onboarding", "permissions"]},
+        {"title": "Vulnerability found in app", "desc": "Recent scan showed a SQL injection vulnerability in our staging site.", "keywords": ["vulnerability-scanning", "ethical-hacking", "incident-response"]},
+        {"title": "Tableau dashboard not loading", "desc": "The PowerBI report is showing no data after the latest refresh.", "keywords": ["bi-tools", "tableau", "powerbi"]},
+        {"title": "Nginx HA Proxy issue", "desc": "Load balancer is not distributing traffic evenly.", "keywords": ["load-balancing", "ha-proxy", "nginx"]},
+        {"title": "Windows Update stuck", "desc": "My Windows 10 machine is stuck at 45% during update for 3 hours.", "keywords": ["windows", "software-install"]},
+        {"title": "Android phone sync", "desc": "My work emails are not syncing to my Android device.", "keywords": ["android", "ios", "peripherals"]},
     ]
 
-    for data in tickets_data:
+    for i in range(1, 26):
+        template = random.choice(ticket_pool)
+        user = random.choice(users)
+        
+        # Find best employee match
+        assigned_emp = None
+        for emp in staff:
+            if any(k in (emp.expertise_tags or []) for k in template["keywords"]):
+                assigned_emp = emp
+                break
+        
+        # Fallback to random staff if no match
+        if not assigned_emp:
+            assigned_emp = random.choice(staff)
+            
         ticket = Ticket(
-            id=data["id"],
-            title=data["title"],
-            description=data["description"],
-            category=data["category"],
-            subcategory=data["subcategory"],
-            severity=data["severity"],
-            urgency=data["urgency"],
-            priority_score=data["priority_score"],
-            status=data["status"],
-            assigned_employee_id=data["assigned_employee_id"],
-            created_at=datetime.datetime.utcnow()
+            id=i,
+            title=template["title"],
+            description=template["desc"],
+            requester_name=user.name,
+            requester_id=user.id,
+            category="Complex",
+            subcategory="Assigned from Seed",
+            severity=random.randint(1, 5),
+            urgency=random.randint(1, 5),
+            priority_score=random.uniform(1.0, 5.0),
+            status="assigned",
+            assigned_employee_id=assigned_emp.id,
+            pipeline_path="Complex",
+            created_at=datetime.datetime.utcnow() - datetime.timedelta(hours=random.randint(1, 100))
         )
         db.add(ticket)
-        
-        # Update employee load if assigned
-        if data["assigned_employee_id"]:
-            emp = db.query(Employee).filter(Employee.id == data["assigned_employee_id"]).first()
-            if emp:
-                emp.current_load += 1
+        assigned_emp.current_load += 1
 
     db.commit()
-    print(f"Successfully seeded {len(tickets_data)} tickets.")
+    print(f"Successfully seeded 25 random tickets.")
     db.close()
 
 if __name__ == "__main__":
