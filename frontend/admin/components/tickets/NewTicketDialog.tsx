@@ -49,7 +49,7 @@ export function NewTicketDialog() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-lg shadow-md shadow-blue-900/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+        className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/50 text-white text-sm font-semibold rounded-lg shadow-md shadow-primary/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
       >
         <Plus size={15} />
         New Ticket
@@ -90,7 +90,7 @@ export function NewTicketDialog() {
                   {...register('subject')}
                   placeholder="Brief description of the issue"
                   className={cn(
-                    'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all placeholder:text-muted-foreground/50',
+                    'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all placeholder:text-muted-foreground/50',
                     errors.subject ? 'border-red-500/50' : 'border-border/60'
                   )}
                 />
@@ -109,7 +109,7 @@ export function NewTicketDialog() {
                   rows={3}
                   placeholder="Detailed explanation of the issue..."
                   className={cn(
-                    'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all resize-none placeholder:text-muted-foreground/50',
+                    'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none placeholder:text-muted-foreground/50',
                     errors.description ? 'border-red-500/50' : 'border-border/60'
                   )}
                 />
@@ -128,7 +128,7 @@ export function NewTicketDialog() {
                     {...register('requesterName')}
                     placeholder="Full name"
                     className={cn(
-                      'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all placeholder:text-muted-foreground/50',
+                      'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all placeholder:text-muted-foreground/50',
                       errors.requesterName ? 'border-red-500/50' : 'border-border/60'
                     )}
                   />
@@ -144,7 +144,7 @@ export function NewTicketDialog() {
                     {...register('requesterDepartment')}
                     placeholder="e.g. Engineering"
                     className={cn(
-                      'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all placeholder:text-muted-foreground/50',
+                      'w-full px-3 py-2.5 text-sm bg-muted/40 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all placeholder:text-muted-foreground/50',
                       errors.requesterDepartment ? 'border-red-500/50' : 'border-border/60'
                     )}
                   />
@@ -162,7 +162,7 @@ export function NewTicketDialog() {
                   </label>
                   <select
                     {...register('priority')}
-                    className="w-full px-3 py-2.5 text-sm bg-muted/40 border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all"
+                    className="w-full px-3 py-2.5 text-sm bg-muted/40 border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -176,7 +176,7 @@ export function NewTicketDialog() {
                   </label>
                   <select
                     {...register('category')}
-                    className="w-full px-3 py-2.5 text-sm bg-muted/40 border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 transition-all"
+                    className="w-full px-3 py-2.5 text-sm bg-muted/40 border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                   >
                     {['Network', 'Software', 'Hardware', 'Licensing', 'Security', 'Access', 'Other'].map((c) => (
                       <option key={c} value={c}>{c}</option>
@@ -197,7 +197,7 @@ export function NewTicketDialog() {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg shadow-md shadow-blue-900/30 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold bg-primary hover:bg-primary/50 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg shadow-md shadow-primary/30 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
                 >
                   {isPending ? 'Creating...' : 'Create Ticket'}
                 </button>

@@ -122,7 +122,7 @@ function AccordionItem({
         onClick={onToggle}
         className="w-full flex items-center justify-between py-3.5 text-left group"
       >
-        <span className="text-[13px] font-medium text-[#323235] dark:text-[#e2e4f0] group-hover:text-[#3b637b] dark:group-hover:text-[#5a8cae] transition-colors leading-snug pr-2">
+        <span className="text-[13px] font-medium text-[#323235] dark:text-[#e2e4f0] group-hover:text-primary dark:group-hover:text-primary transition-colors leading-snug pr-2">
           {item.question}
         </span>
         {isOpen ? (
@@ -136,7 +136,7 @@ function AccordionItem({
           <ul className="space-y-1.5">
             {item.bullets.map((point, i) => (
               <li key={i} className="flex items-start gap-2 text-[12px] text-[#5f5f62] dark:text-[#a0a5b5] leading-relaxed">
-                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#3b637b] dark:bg-[#5a8cae] shrink-0" />
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary dark:bg-primary shrink-0" />
                 {point}
               </li>
             ))}
@@ -153,7 +153,7 @@ function ChatMessage({ msg }: { msg: Message }) {
   if (isUser) {
     return (
       <div className="flex gap-3 max-w-[80%] ml-auto justify-end">
-        <div className="bg-[#3b637b] dark:bg-[#2e576e] p-3.5 rounded-xl rounded-tr-sm text-white text-[13px] leading-relaxed shadow-[0px_4px_12px_rgba(59,99,123,0.18)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)] whitespace-pre-wrap">
+        <div className="bg-primary dark:bg-primary p-3.5 rounded-xl rounded-tr-sm text-white text-[13px] leading-relaxed shadow-[0px_4px_12px_rgba(59,99,123,0.18)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)] whitespace-pre-wrap">
           {msg.content}
           <div className="text-[10px] text-white/60 font-semibold tracking-wider uppercase mt-2">
             {msg.timestamp}
@@ -168,7 +168,7 @@ function ChatMessage({ msg }: { msg: Message }) {
 
   return (
     <div className="flex gap-3 max-w-[80%]">
-      <div className="w-8 h-8 rounded-lg bg-[#3b637b]/15 dark:bg-[#1e2532] flex items-center justify-center shrink-0 text-[#3b637b] dark:text-[#5a8cae] mt-0.5">
+      <div className="w-8 h-8 rounded-lg bg-primary/15 dark:bg-primary/10 flex items-center justify-center shrink-0 text-primary dark:text-primary mt-0.5">
         <Bot size={16} />
       </div>
       <div>
@@ -183,7 +183,7 @@ function ChatMessage({ msg }: { msg: Message }) {
             {msg.actions.map((action) => (
               <button
                 key={action.label}
-                className="px-3 py-1.5 rounded-md text-[11px] font-semibold border border-[#e0dede] dark:border-white/10 text-[#3b637b] dark:text-[#5a8cae] bg-white dark:bg-[#1e1f29] hover:bg-[#f0f4f6] dark:hover:bg-[#252735] transition-colors"
+                className="px-3 py-1.5 rounded-md text-[11px] font-semibold border border-[#e0dede] dark:border-white/10 text-primary dark:text-primary bg-white dark:bg-[#1e1f29] hover:bg-[#f0f4f6] dark:hover:bg-[#252735] transition-colors"
               >
                 {action.label}
               </button>
@@ -234,6 +234,7 @@ function SupportPageContent() {
         ticket_id: ticketId,
         ticket_text: text,
         requester_name: user?.name || 'Unknown User',
+        requester_id: user?.id,
       });
 
       const dbId = result.db_ticket_id ? `#${result.db_ticket_id}` : ticketId;

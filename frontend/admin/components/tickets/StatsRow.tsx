@@ -33,7 +33,7 @@ export function StatsRow() {
       label: 'SYSTEM HEALTH',
       value: stats?.systemHealth ?? 'Active',
       icon: Cpu,
-      className: 'bg-gradient-to-br from-[#1e3a5f] to-[#1a2c4e] border-blue-800/50 text-white',
+      className: 'bg-gradient-to-br from-[#1e3a5f] to-[#1a2c4e] border-primary/50 text-white',
       valueClass: 'text-2xl font-bold text-white flex items-center gap-2',
       isHealth: true,
     },
@@ -50,7 +50,7 @@ export function StatsRow() {
             isLoading && 'animate-pulse'
           )}
         >
-          <p className={cn('text-[10px] font-bold uppercase tracking-widest mb-2', isHealth ? 'text-blue-300/70' : 'text-muted-foreground')}>
+          <p className={cn('text-[10px] font-bold uppercase tracking-widest mb-2', isHealth ? 'text-primary/70/70' : 'text-muted-foreground')}>
             {label}
           </p>
           <div className={valueClass}>

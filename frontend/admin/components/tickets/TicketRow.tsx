@@ -29,7 +29,7 @@ function AvatarInitials({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md
 
   const colors = [
     'from-violet-500 to-purple-600',
-    'from-blue-500 to-cyan-600',
+    'from-primary to-primary/70',
     'from-emerald-500 to-teal-600',
     'from-orange-500 to-amber-600',
     'from-rose-500 to-pink-600',
@@ -154,10 +154,10 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
 
       {/* Subject */}
       <td className="px-4 py-4 max-w-[240px]">
-        <p className="text-sm font-medium text-blue-400 hover:text-blue-300 cursor-pointer leading-snug transition-colors flex items-center gap-2">
+        <p className="text-sm font-medium text-primary hover:text-primary/70 cursor-pointer leading-snug transition-colors flex items-center gap-2">
           TKT-{ticket.id.padStart(4, '0')}
           {ticket.pipelinePath && (
-            <span className="bg-blue-500/10 text-blue-400 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+            <span className="bg-primary/50/10 text-primary text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
               {ticket.pipelinePath}
             </span>
           )}
@@ -232,7 +232,7 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
                 <h4 className="font-semibold text-foreground flex items-center gap-2">
                   Resolution & Output
                   {ticket.pipelinePath && (
-                    <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
+                    <span className="bg-primary/50/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">
                       {ticket.pipelinePath} Path
                     </span>
                   )}

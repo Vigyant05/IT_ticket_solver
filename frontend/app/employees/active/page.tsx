@@ -32,8 +32,8 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; b
   open: {
     label: 'Open',
     icon: AlertCircle,
-    color: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-500/15',
+    color: 'text-primary dark:text-primary',
+    bg: 'bg-primary/10 dark:bg-primary/15',
   },
   in_progress: {
     label: 'In Progress',
@@ -100,7 +100,7 @@ function ActiveTicketsContent() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-8 w-8 animate-spin text-[#3b637b]" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
           <>
@@ -134,7 +134,7 @@ function ActiveTicketsContent() {
                         idx !== tickets.length - 1 && 'border-b border-[#f0eff0] dark:border-white/5'
                       )}
                     >
-                      <span className="text-[12px] font-mono font-bold text-[#3b637b] dark:text-[#5a8cae]">
+                      <span className="text-[12px] font-mono font-bold text-primary dark:text-primary">
                         #{ticket.id}
                       </span>
                       <span className="text-[13px] text-[#323235] dark:text-[#e2e4f0] line-clamp-1 font-medium">
@@ -165,8 +165,8 @@ function ActiveTicketsContent() {
             {/* Stats row */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-5">
               {[
-                { label: 'Active Tickets', value: tickets.length, color: 'text-[#3b637b] dark:text-[#5a8cae]' },
-                { label: 'Open', value: tickets.filter(t => t.status === 'open').length, color: 'text-blue-600 dark:text-blue-400' },
+                { label: 'Active Tickets', value: tickets.length, color: 'text-primary dark:text-primary' },
+                { label: 'Open', value: tickets.filter(t => t.status === 'open').length, color: 'text-primary dark:text-primary' },
                 { label: 'Assigned', value: tickets.filter(t => t.status === 'assigned').length, color: 'text-amber-600 dark:text-amber-400' },
               ].map((stat) => (
                 <div key={stat.label} className="bg-white dark:bg-[#1a1b24] rounded-xl p-4 shadow-[0px_4px_24px_rgba(13,60,82,0.04)] dark:shadow-none dark:border dark:border-white/5 text-center">

@@ -112,7 +112,7 @@ export function TicketTable() {
               className={cn(
                 'w-7 h-7 rounded-md text-xs font-medium transition-all duration-200',
                 p === page
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-primary text-white shadow-sm'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
               )}
             >

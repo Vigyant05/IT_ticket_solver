@@ -4,6 +4,8 @@ pydantic
 chromadb
 sentence-transformers
 langchain-ollama
+langchain-openai
+langchain-groq
 langchain-core
 python-dotenv
 pandas

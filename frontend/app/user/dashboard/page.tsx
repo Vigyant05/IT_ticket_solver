@@ -42,6 +42,7 @@ function UserDashboardContent() {
       ticket_id: `TKT-${Date.now()}`,
       ticket_text: text,
       requester_name: user?.name || 'User',
+      requester_id: user?.id,
     }),
     onSuccess: () => {
       toast.success('Ticket raised successfully!');

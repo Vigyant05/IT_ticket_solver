@@ -79,10 +79,11 @@ function MessagingPageContent() {
   });
 
   // Send message mutation
+  const myId = `User:${user?.id}`;
   const { mutate: sendMsg, isPending: isSending } = useMutation({
     mutationFn: (content: string) => sendMessage({
       ticket_id: selectedTicket.id,
-      sender_id: 'User',
+      sender_id: myId,
       receiver_id: `Employee:${selectedTicket.assigned_employee_id}`,
       sender_name: user?.name || 'User',
       content
@@ -234,7 +235,7 @@ function MessagingPageContent() {
                 </div>
               ) : (
                 messages.map((msg: any, idx: number) => {
-                  const isMe = msg.sender_id === 'User';
+                  const isMe = msg.sender_id === myId || msg.sender_id === 'User';
                   return (
                     <div 
                       key={idx} 

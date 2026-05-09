@@ -65,13 +65,13 @@ function InsightsContent() {
   const topCategory = Object.entries(categoryBreakdown).sort(([, a], [, b]) => b - a)[0];
   const topCatPercent = topCategory && totalTickets > 0 ? Math.round((topCategory[1] / totalTickets) * 100) : 0;
 
-  const categoryColors = ['#3b637b', '#5a8cae', '#7bb0d6', '#b2b1b5', '#d4d3d7'];
+  const categoryColors = ['#4285f4', '#5b9cf6', '#7ab3f8', '#b2b1b5', '#d4d3d7'];
 
   return (
     <div className="min-h-screen bg-[#fcf8f9] dark:bg-[#12131a] text-[#323235] dark:text-[#f5f6fa] p-4 lg:p-8 font-sans">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-[#3b637b] dark:text-[#5a8cae] mb-2">
+        <div className="flex items-center gap-2 text-primary dark:text-primary mb-2">
           <Activity size={14} />
           <span className="text-xs font-semibold tracking-wide">System Intelligence Dashboard</span>
         </div>
@@ -85,7 +85,7 @@ function InsightsContent() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
-          <div className="w-8 h-8 border-4 border-[#3b637b]/30 border-t-[#3b637b] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       ) : (
         <>
@@ -94,7 +94,7 @@ function InsightsContent() {
             {/* Card 1 */}
             <div className="bg-[#ffffff] dark:bg-[#252735] rounded-xl p-5 shadow-[0px_8px_24px_rgba(13,60,82,0.04)] dark:shadow-none dark:border dark:border-white/5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-5">
-                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae]">
+                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-primary dark:text-primary">
                   <Ticket size={20} strokeWidth={1.5} />
                 </div>
               </div>
@@ -107,7 +107,7 @@ function InsightsContent() {
             {/* Card 2 */}
             <div className="bg-[#ffffff] dark:bg-[#252735] rounded-xl p-5 shadow-[0px_8px_24px_rgba(13,60,82,0.04)] dark:shadow-none dark:border dark:border-white/5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-5">
-                <div className="w-10 h-10 bg-[#fcf8f9] dark:bg-[#1e1f29] border border-[#f6f3f4] dark:border-transparent rounded-lg flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae]">
+                <div className="w-10 h-10 bg-[#fcf8f9] dark:bg-[#1e1f29] border border-[#f6f3f4] dark:border-transparent rounded-lg flex items-center justify-center text-primary dark:text-primary">
                   <CheckCircle2 size={20} strokeWidth={1.5} />
                 </div>
                 <span className="text-[10px] font-semibold px-2.5 py-1 bg-[#f6f3f4] dark:bg-[#1e1f29] text-[#5f5f62] dark:text-[#a0a5b5] rounded-full">
@@ -118,7 +118,7 @@ function InsightsContent() {
                 <p className="text-[#5f5f62] dark:text-[#a0a5b5] text-xs font-medium mb-1">Resolution Rate</p>
                 <div className="flex items-end gap-3">
                    <p className="font-manrope text-3xl font-bold text-[#323235] dark:text-[#ffffff] tracking-tight">{resolutionRate}%</p>
-                   <div className="w-12 h-1 bg-[#3b637b] dark:bg-[#5a8cae] rounded-full mb-2"></div>
+                   <div className="w-12 h-1 bg-primary dark:bg-primary rounded-full mb-2"></div>
                 </div>
               </div>
             </div>
@@ -126,7 +126,7 @@ function InsightsContent() {
             {/* Card 3 */}
             <div className="bg-[#ffffff] dark:bg-[#252735] rounded-xl p-5 shadow-[0px_8px_24px_rgba(13,60,82,0.04)] dark:shadow-none dark:border dark:border-white/5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-5">
-                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae]">
+                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-primary dark:text-primary">
                   <Clock size={20} strokeWidth={1.5} />
                 </div>
               </div>
@@ -141,7 +141,7 @@ function InsightsContent() {
             {/* Card 4 */}
             <div className="bg-[#ffffff] dark:bg-[#252735] rounded-xl p-5 shadow-[0px_8px_24px_rgba(13,60,82,0.04)] dark:shadow-none dark:border dark:border-white/5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-5">
-                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-[#3b637b] dark:text-[#5a8cae]">
+                <div className="w-10 h-10 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-lg flex items-center justify-center text-primary dark:text-primary">
                   <Users size={20} strokeWidth={1.5} />
                 </div>
               </div>
@@ -194,7 +194,7 @@ function InsightsContent() {
               {/* Top category display */}
               <div className="flex-1 flex flex-col items-center justify-center py-4">
                 <div className="relative w-32 h-32">
-                   <div className="absolute inset-0 border-[12px] border-[#3b637b] dark:border-[#5a8cae] rounded-xl"></div>
+                   <div className="absolute inset-0 border-[12px] border-primary dark:border-primary rounded-xl"></div>
                    <div className="absolute inset-[-4px] border-[4px] border-[#fcf8f9] dark:border-[#12131a] rounded-[1rem] z-10 pointer-events-none"></div>
                    <div className="absolute inset-0 border-[1px] border-[#f6f3f4] dark:border-[#1e1f29] rounded-xl m-[10px]"></div>
                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-[#1e1f29] m-3 rounded-lg z-20">

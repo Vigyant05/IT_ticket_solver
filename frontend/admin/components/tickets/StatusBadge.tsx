@@ -17,7 +17,7 @@ const STATUS_CONFIG: Record<
   },
   in_progress: {
     label: 'IN PROGRESS',
-    className: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    className: 'bg-primary/50/20 text-primary border border-primary/30',
   },
   resolved: {
     label: 'RESOLVED',
@@ -40,7 +40,7 @@ const STATUS_CONFIG: Record<
 const DOT_COLORS: Record<TicketStatus, string> = {
   critical: 'bg-red-500',
   pending: 'bg-amber-400',
-  in_progress: 'bg-blue-400',
+  in_progress: 'bg-primary',
   resolved: 'bg-emerald-400',
   faq_resolved: 'bg-purple-400',
   action_path_resolved: 'bg-cyan-400',

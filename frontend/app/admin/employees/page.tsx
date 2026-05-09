@@ -69,7 +69,7 @@ function EmployeesContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search staff directory..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-full text-sm placeholder:text-[#5f5f62] dark:placeholder:text-[#a0a5b5] text-[#323235] dark:text-[#f5f6fa] border border-transparent dark:border-white/5 focus:outline-none focus:ring-[2px] focus:ring-[#3b637b]/40 focus:bg-[#ffffff] dark:focus:bg-[#252735] transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-[#f6f3f4] dark:bg-[#1e1f29] rounded-full text-sm placeholder:text-[#5f5f62] dark:placeholder:text-[#a0a5b5] text-[#323235] dark:text-[#f5f6fa] border border-transparent dark:border-white/5 focus:outline-none focus:ring-[2px] focus:ring-primary/40 focus:bg-[#ffffff] dark:focus:bg-[#252735] transition-all"
           />
         </div>
       </div>
@@ -88,7 +88,7 @@ function EmployeesContent() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-24">
-          <div className="w-8 h-8 border-4 border-[#3b637b]/30 border-t-[#3b637b] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
         </div>
       ) : (
         /* Main Container */
@@ -120,11 +120,11 @@ function EmployeesContent() {
                >
                  {/* Employee */}
                  <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#3b637b] to-[#5a8cae] shrink-0 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-tr from-primary to-primary/70 shrink-0 flex items-center justify-center text-white font-bold text-sm">
                        {emp.name.charAt(0)}
                     </div>
                     <div>
-                       <p className="font-semibold text-[#323235] dark:text-[#f5f6fa] text-[15px] group-hover:text-[#3b637b] dark:group-hover:text-[#5a8cae] transition-colors">{emp.name}</p>
+                       <p className="font-semibold text-[#323235] dark:text-[#f5f6fa] text-[15px] group-hover:text-primary dark:group-hover:text-primary transition-colors">{emp.name}</p>
                        <p className="text-[#5f5f62] dark:text-[#a0a5b5] text-[13px] mt-0.5">{emp.role}</p>
                     </div>
                  </div>
@@ -140,7 +140,7 @@ function EmployeesContent() {
                  <div className="flex items-center gap-3">
                     <div className="w-full max-w-[140px] h-2 bg-[#f6f3f4] dark:bg-[#12131a] rounded-full overflow-hidden">
                        <div
-                          className="h-full bg-[#3b637b] dark:bg-[#5a8cae] rounded-full"
+                          className="h-full bg-primary dark:bg-primary rounded-full"
                           style={{ width: `${(emp.skill_level / 5) * 100}%` }}
                        ></div>
                     </div>

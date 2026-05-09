@@ -92,7 +92,7 @@ function ChatbotContent() {
 
          {/* Header */}
          <div className="mb-6 shrink-0">
-            <h1 className="text-2xl font-manrope font-bold text-[#172229] dark:text-[#5a8cae] mb-1.5 leading-tight">
+            <h1 className="text-2xl font-manrope font-bold text-[#172229] dark:text-primary mb-1.5 leading-tight">
                Employee Messaging
             </h1>
             <p className="text-[#5f5f62] dark:text-[#a0a5b5] text-sm max-w-3xl leading-relaxed">
@@ -123,14 +123,14 @@ function ChatbotContent() {
                         return (
                            <div key={msg.id} className={cn("flex gap-4 max-w-[85%]", isAdmin ? "ml-auto justify-end" : "")}>
                               {!isAdmin && (
-                                 <div className="w-8 h-8 rounded-lg bg-[#ecf4f8] dark:bg-[#1e2532] flex items-center justify-center shrink-0 text-[#172229] dark:text-[#5a8cae]">
+                                 <div className="w-8 h-8 rounded-lg bg-primary/10 dark:bg-primary/10 flex items-center justify-center shrink-0 text-[#172229] dark:text-primary">
                                     <User size={18} />
                                  </div>
                               )}
                               <div className={cn(
                                  "p-4 rounded-xl text-[13px] leading-relaxed whitespace-pre-wrap",
                                  isAdmin 
-                                    ? "bg-[#172229] text-[#ffffff] rounded-tr-sm shadow-[0px_4px_12px_rgba(59,99,123,0.15)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)]"
+                                    ? "bg-primary text-[#ffffff] rounded-tr-sm shadow-[0px_4px_12px_rgba(59,99,123,0.15)] dark:shadow-[0px_4px_12px_rgba(0,0,0,0.3)]"
                                     : "bg-[#f6f3f4] dark:bg-[#252735] text-[#323235] dark:text-[#f5f6fa] rounded-tl-sm shadow-sm dark:shadow-none dark:border dark:border-white/5"
                               )}>
                                  {msg.content}
@@ -167,7 +167,7 @@ function ChatbotContent() {
                      <button 
                         onClick={handleSend}
                         disabled={!activeContact || isPending || !messageInput.trim()}
-                        className="absolute right-2 w-8 h-8 rounded-md bg-[#172229] dark:bg-[#5a8cae] flex items-center justify-center text-white hover:bg-[#2e576e] dark:hover:bg-[#467393] disabled:opacity-50"
+                        className="absolute right-2 w-8 h-8 rounded-md bg-primary dark:bg-primary flex items-center justify-center text-white hover:bg-primary dark:hover:bg-primary/80 disabled:opacity-50"
                      >
                         {isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} className="translate-x-[-1px] translate-y-[1px]" />}
                      </button>
@@ -185,7 +185,7 @@ function ChatbotContent() {
             <div className="w-[300px] shrink-0 flex flex-col h-full bg-transparent">
                <div className="flex items-center justify-between mb-4 px-1 shrink-0">
                   <h3 className="font-bold text-[10px] tracking-widest uppercase text-[#5f5f62] dark:text-[#a0a5b5]">Directory Contacts</h3>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-[#172229] dark:text-[#5a8cae]">{employees.length} Online</span>
+                  <span className="text-[10px] font-bold tracking-widest uppercase text-[#172229] dark:text-primary">{employees.length} Online</span>
                </div>
 
                <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide pb-4">
@@ -197,11 +197,11 @@ function ChatbotContent() {
                         onClick={() => setActiveContact(emp)}
                         className={cn(
                            "bg-[#ffffff] dark:bg-[#252735] rounded-xl p-4 shadow-[0px_4px_16px_rgba(13,60,82,0.03)] dark:shadow-none dark:border dark:border-white/5 cursor-pointer transition-colors relative",
-                           activeContact?.id === emp.id ? "ring-2 ring-[#5a8cae] dark:ring-[#7bb0d6]" : "hover:bg-[#fcf8f9] dark:hover:bg-[#2e3040]"
+                           activeContact?.id === emp.id ? "ring-2 ring-primary dark:ring-[#7bb0d6]" : "hover:bg-[#fcf8f9] dark:hover:bg-[#2e3040]"
                         )}
                      >
                         <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                           <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm shrink-0">
                               {emp.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                            </div>
                            <div className="flex-1 min-w-0">
@@ -218,7 +218,7 @@ function ChatbotContent() {
                                     {emp.lastMessageText || emp.team}
                                  </p>
                                  {emp.messageCount > 0 && (
-                                    <span className="bg-[#172229] dark:bg-[#5a8cae] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
+                                    <span className="bg-primary dark:bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
                                        {emp.messageCount}
                                     </span>
                                  )}

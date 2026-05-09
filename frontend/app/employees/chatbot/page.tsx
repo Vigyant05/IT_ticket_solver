@@ -116,14 +116,14 @@ function EmployeeChatbotContent() {
                               return (
                                  <div key={msg.id} className={cn("flex gap-4 max-w-[85%]", isMe ? "ml-auto justify-end" : "")}>
                                     {!isMe && (
-                                       <div className="w-8 h-8 rounded-lg bg-[#ecf4f8] dark:bg-[#1e2532] flex items-center justify-center shrink-0 text-[#3b637b] dark:text-[#5a8cae]">
+                                       <div className="w-8 h-8 rounded-lg bg-primary/10 dark:bg-primary/10 flex items-center justify-center shrink-0 text-primary dark:text-primary">
                                           <UserIcon size={18} />
                                        </div>
                                     )}
                                     <div className={cn(
                                        "p-4 rounded-xl text-[13px] leading-relaxed whitespace-pre-wrap",
                                        isMe 
-                                          ? "bg-[#3b637b] dark:bg-[#2e576e] text-white rounded-tr-sm shadow-sm"
+                                          ? "bg-primary dark:bg-primary text-white rounded-tr-sm shadow-sm"
                                           : "bg-[#f6f5f5] dark:bg-[#252735] text-[#323235] dark:text-[#e2e4f0] rounded-tl-sm shadow-sm dark:border dark:border-white/5"
                                     )}>
                                        {msg.content}
@@ -154,12 +154,12 @@ function EmployeeChatbotContent() {
                               onChange={(e) => setMessageInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                               placeholder={activeContact ? `Message ${activeContact.name}...` : "Select a contact..."}
-                              className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg py-2.5 pl-4 pr-14 text-sm text-[#323235] dark:text-[#e2e4f0] placeholder:text-[#b2b1b5] dark:placeholder:text-[#a0a5b5] focus:outline-none focus:ring-2 focus:ring-[#3b637b]/30 shadow-sm disabled:opacity-50"
+                              className="w-full bg-[#f6f3f4] dark:bg-[#252735] border border-transparent dark:border-white/5 rounded-lg py-2.5 pl-4 pr-14 text-sm text-[#323235] dark:text-[#e2e4f0] placeholder:text-[#b2b1b5] dark:placeholder:text-[#a0a5b5] focus:outline-none focus:ring-2 focus:ring-primary/30 shadow-sm disabled:opacity-50"
                            />
                            <button 
                               onClick={handleSend}
                               disabled={!activeContact || isPending || !messageInput.trim()}
-                              className="absolute right-2 w-8 h-8 rounded-md bg-[#3b637b] dark:bg-[#2e576e] flex items-center justify-center text-white hover:bg-[#24465a] disabled:opacity-50 transition-colors"
+                              className="absolute right-2 w-8 h-8 rounded-md bg-primary dark:bg-primary flex items-center justify-center text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
                            >
                               {isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} className="translate-x-[-1px] translate-y-[1px]" />}
                            </button>
@@ -182,7 +182,7 @@ function EmployeeChatbotContent() {
                               onClick={() => setActiveContact(contact)}
                               className={cn(
                                  "bg-white dark:bg-[#1a1b24] rounded-xl p-4 shadow-[0px_4px_24px_rgba(13,60,82,0.06)] dark:shadow-none dark:border dark:border-white/5 cursor-pointer transition-colors relative",
-                                 activeContact?.id === contact.id ? "ring-2 ring-[#3b637b] dark:ring-[#5a8cae]" : "hover:bg-[#fcf8f9] dark:hover:bg-[#252735]"
+                                 activeContact?.id === contact.id ? "ring-2 ring-primary dark:ring-primary" : "hover:bg-[#fcf8f9] dark:hover:bg-[#252735]"
                               )}
                            >
                               <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ function EmployeeChatbotContent() {
                                           {contact.lastMessageText || contact.role}
                                        </p>
                                        {contact.messageCount > 0 && (
-                                          <span className="bg-[#3b637b] dark:bg-[#5a8cae] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
+                                          <span className="bg-primary dark:bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
                                              {contact.messageCount}
                                           </span>
                                        )}

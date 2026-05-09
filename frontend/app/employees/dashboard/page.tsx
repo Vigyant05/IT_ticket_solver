@@ -133,7 +133,7 @@ function EmployeeDashboardContent() {
                         "w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm",
                         ticket.severity >= 5 ? "bg-red-500 text-white" :
                         ticket.severity >= 4 ? "bg-orange-500 text-white" :
-                        "bg-blue-500 text-white"
+                        "bg-primary text-white"
                       )}>
                         {ticket.severity}
                       </div>
@@ -176,7 +176,7 @@ function EmployeeDashboardContent() {
           <div className="space-y-6">
             <div className="bg-white dark:bg-[#1a1b24] rounded-2xl p-6 border border-[#eeecee] dark:border-white/5 shadow-sm">
               <h3 className="text-sm font-bold dark:text-white mb-5 flex items-center gap-2">
-                <MessageSquare size={16} className="text-blue-500" />
+                <MessageSquare size={16} className="text-primary" />
                 Collaboration Hub
               </h3>
               <div className="space-y-3">
@@ -185,7 +185,7 @@ function EmployeeDashboardContent() {
                     <Users size={20} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold dark:text-gray-200 group-hover:text-blue-600">Staff Messaging</p>
+                    <p className="text-sm font-bold dark:text-gray-200 group-hover:text-primary">Staff Messaging</p>
                     <p className="text-[11px] text-[#a0a5b5]">24 active employees</p>
                   </div>
                   <ChevronRight size={16} className="text-[#a0a5b5]" />

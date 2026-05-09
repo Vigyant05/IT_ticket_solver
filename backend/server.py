@@ -125,6 +125,7 @@ class PipelineTicketRequest(BaseModel):
     ticket_id: str = "TKT-001"
     ticket_text: str
     requester_name: Optional[str] = "Unknown User"
+    requester_id: Optional[int] = None
 
 class MessageRequest(BaseModel):
     ticket_id: Optional[int] = None
@@ -314,6 +315,7 @@ def submit_ticket(req: PipelineTicketRequest, db: Session = Depends(get_db)):
         title=req.ticket_text[:50] + ("..." if len(req.ticket_text) > 50 else ""),
         description=req.ticket_text,
         requester_name=req.requester_name,
+        requester_id=req.requester_id,
         status="open",
     )
     db.add(db_ticket)
@@ -332,14 +334,24 @@ def submit_ticket(req: PipelineTicketRequest, db: Session = Depends(get_db)):
     try:
         final_state = brain.invoke(initial_state)
 
-        # Update ticket status in DB based on pipeline result
-        db_ticket.status = final_state.get("status", "open")
+        # The complex_node uses its own DB session, so our db_ticket is stale.
+        # Expire + refresh forces SQLite to re-read the row from disk.
+        db.expire(db_ticket)
+        db.refresh(db_ticket)
+
+        # Update ticket metadata from pipeline result
         resolution_dict = final_state.get("resolution", {})
         db_ticket.pipeline_path = resolution_dict.get("path")
         db_ticket.resolution_notes = resolution_dict.get("answer") or resolution_dict.get("message")
-        
-        if resolution_dict.get("assigned_agent"):
-            pass  # assigned_employee_id is updated inside routing_engine
+
+        # Explicitly set assigned_employee_id from resolution (belt-and-suspenders)
+        if resolution_dict.get("assigned_employee_id") and not db_ticket.assigned_employee_id:
+            db_ticket.assigned_employee_id = resolution_dict["assigned_employee_id"]
+
+        # Only override status if complex_node didn't already set "assigned"
+        if db_ticket.status not in ("assigned", "pending_assignment"):
+            db_ticket.status = final_state.get("status", "open")
+
         db.commit()
 
         return {
@@ -565,13 +577,23 @@ def create_ticket(ticket: TicketCreate, db: Session = Depends(get_db)):
 
 @app.put("/api/ticket/{ticket_id}/resolve")
 def resolve_ticket(ticket_id: int, db: Session = Depends(get_db)):
-    """Mark a ticket as resolved and decrement agent load."""
+    """Mark a ticket as resolved and decrement agent load, capturing last message as resolution note."""
     ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     ticket.status = "complex_path_resolved"
     ticket.resolved_at = datetime.utcnow()
+
+    # Capture the last message as the resolution note
+    last_message = db.query(models.ChatMessage).filter(
+        models.ChatMessage.ticket_id == ticket_id
+    ).order_by(models.ChatMessage.timestamp.desc()).first()
+    
+    if last_message:
+        ticket.resolution_notes = f"Resolved by {last_message.sender_name}:\n{last_message.content}"
+    else:
+        ticket.resolution_notes = "Ticket resolved by assigned agent."
 
     if ticket.assigned_employee_id:
         emp = db.query(models.Employee).filter(models.Employee.id == ticket.assigned_employee_id).first()

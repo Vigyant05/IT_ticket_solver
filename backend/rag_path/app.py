@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import chromadb
 from sentence_transformers import SentenceTransformer
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -19,17 +20,62 @@ client = chromadb.PersistentClient(path=DB_DIR)
 collection = client.get_or_create_collection("it_tickets")
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Setup LLM based on environment key
-api_key = os.getenv("OLLAMA_API_KEY")
-if api_key:
-    llm = ChatOllama(
-        base_url="https://ollama.com",
-        model="qwen3.5",
-        client_kwargs={"headers": {"Authorization": f"Bearer {api_key}"}},
-    )
-else:
-    llm = None
-    print("WARNING: OLLAMA_API_KEY is not set in environment. Answer generation will fallback to only returning retrieved text.")
+# --- LLM Setup: Ollama Cloud (primary) → Groq (fallback) ---
+def _init_llm():
+    """Try Ollama Cloud Qwen 3.5 first; fall back to Groq if it fails."""
+
+    # --- Attempt 1: Ollama Cloud ---
+    ollama_key = os.getenv("OLLAMA_API_KEY")
+    if ollama_key:
+        print("[LLM] Attempting Ollama Cloud (qwen3.5:latest)...")
+        try:
+            test_llm = ChatOpenAI(
+                model="qwen3.5:latest",
+                base_url="https://ollama.com/v1",
+                api_key=ollama_key,
+                temperature=0.2,
+                max_tokens=32,
+                timeout=15,
+            )
+            # Quick smoke test
+            test_llm.invoke("Say OK")
+            print("[LLM] ✅ Ollama Cloud connected successfully — using Qwen 3.5")
+            # Return production instance (without the tight token limit)
+            return ChatOpenAI(
+                model="qwen3.5:latest",
+                base_url="https://ollama.com/v1",
+                api_key=ollama_key,
+                temperature=0.3,
+            )
+        except Exception as e:
+            print(f"[LLM] ⚠ Ollama Cloud failed: {e}")
+    else:
+        print("[LLM] OLLAMA_API_KEY not set, skipping Ollama Cloud.")
+
+    # --- Attempt 2: Groq (fallback) ---
+    groq_key = os.getenv("GROQ_API_KEY")
+    if groq_key:
+        print("[LLM] Falling back to Groq (Llama 3.3 70B)...")
+        try:
+            test_llm = ChatGroq(
+                model="llama-3.3-70b-versatile",
+                api_key=groq_key,
+            )
+            test_llm.invoke("Say OK")
+            print("[LLM] ✅ Groq connected successfully — using Llama 3.3 70B")
+            return ChatGroq(
+                model="llama-3.3-70b-versatile",
+                api_key=groq_key,
+            )
+        except Exception as e:
+            print(f"[LLM] ⚠ Groq also failed: {e}")
+    else:
+        print("[LLM] GROQ_API_KEY not set either.")
+
+    print("[LLM] ❌ No LLM available — answers will use retrieved text only.")
+    return None
+
+llm = _init_llm()
 
 # Define the RAG prompt
 template = """

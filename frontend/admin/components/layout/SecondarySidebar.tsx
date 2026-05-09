@@ -61,7 +61,7 @@ export function SecondarySidebar() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm bg-background border border-border rounded-lg 
                        placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 
-                       focus:ring-blue-500/30 focus:border-blue-500/50 transition-all duration-200"
+                       focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
           />
         </div>
       </div>
@@ -84,7 +84,7 @@ export function SecondarySidebar() {
                     className={cn(
                       "w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors group",
                       isActive
-                        ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                        ? "bg-primary/5 dark:bg-primary/50/10 text-primary dark:text-primary"
                         : "text-foreground hover:bg-muted/50"
                     )}
                   >
@@ -92,7 +92,7 @@ export function SecondarySidebar() {
                     <span className={cn(
                       "text-xs px-2 py-0.5 rounded-full transition-colors",
                       isActive
-                        ? "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300"
+                        ? "bg-primary/10 dark:bg-primary/50/20 text-primary dark:text-primary/70"
                         : "bg-muted text-muted-foreground group-hover:bg-border/60"
                     )}>
                       {count}

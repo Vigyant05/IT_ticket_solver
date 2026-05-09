@@ -45,7 +45,7 @@ function ProfileContent() {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center h-screen bg-[#f8f7f9] dark:bg-[#12131a]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#3b637b]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ function ProfileContent() {
             {/* Avatar Section */}
             <div className="p-8 border-b border-[#f0eff0] dark:border-white/5 flex items-center gap-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#f8f7f9] dark:border-[#12131a] bg-gradient-to-tr from-[#3b637b] to-[#5a8cae] shadow-sm flex items-center justify-center text-white text-3xl font-bold">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#f8f7f9] dark:border-[#12131a] bg-gradient-to-tr from-primary to-primary/70 shadow-sm flex items-center justify-center text-white text-3xl font-bold">
                   {empData.name.charAt(0)}
                 </div>
               </div>
@@ -144,7 +144,7 @@ function ProfileContent() {
                   <div className="flex flex-wrap gap-2">
                     {empData.expertise_tags.length > 0 ? (
                       empData.expertise_tags.map((tag) => (
-                        <span key={tag} className="px-3 py-1.5 bg-[#e8f1f5] dark:bg-[#1e2532] text-[#3b637b] dark:text-[#5a8cae] rounded-lg text-[12px] font-semibold">
+                        <span key={tag} className="px-3 py-1.5 bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary rounded-lg text-[12px] font-semibold">
                           {tag}
                         </span>
                       ))
@@ -161,19 +161,19 @@ function ProfileContent() {
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
-                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.skill_level}/5</p>
+                      <p className="text-xl font-bold text-primary dark:text-primary">{empData.skill_level}/5</p>
                       <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Skill Level</p>
                     </div>
                     <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
-                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.current_load}</p>
+                      <p className="text-xl font-bold text-primary dark:text-primary">{empData.current_load}</p>
                       <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Current Load</p>
                     </div>
                     <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
-                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.priority_handling_capability}</p>
+                      <p className="text-xl font-bold text-primary dark:text-primary">{empData.priority_handling_capability}</p>
                       <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Priority Cap.</p>
                     </div>
                     <div className="bg-[#f6f3f4] dark:bg-[#252735] rounded-lg p-3 text-center">
-                      <p className="text-xl font-bold text-[#3b637b] dark:text-[#5a8cae]">{empData.avg_resolution_time || 0}h</p>
+                      <p className="text-xl font-bold text-primary dark:text-primary">{empData.avg_resolution_time || 0}h</p>
                       <p className="text-[10px] text-[#5f5f62] dark:text-[#a0a5b5] font-semibold mt-0.5">Avg Resolution</p>
                     </div>
                   </div>
