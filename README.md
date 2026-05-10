@@ -108,7 +108,6 @@ IT_ticket_solver/
 # Install Python dependencies
 cd backend
 pip install -r requirements.txt
-pip install -r rag_path/requirements.txt
 
 # Create .env files for each path
 echo "GROQ_API_KEY=your_groq_key" > ai_router_agent/.env
