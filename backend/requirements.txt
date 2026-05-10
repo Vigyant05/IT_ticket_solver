@@ -5,21 +5,15 @@ pydantic
 python-multipart
 requests
 
-# --- Database & Storage ---
+# --- Database ---
 sqlalchemy
 psycopg2-binary
-chromadb
-faiss-cpu
-numpy
 
 # --- AI & LLM Integration ---
 groq
-ollama
-sentence-transformers
 langchain-core
-langchain-ollama
+langchain-groq
 langgraph
 
-# --- Data & Utilities ---
+# --- Utilities ---
 python-dotenv
-pandas

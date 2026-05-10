@@ -15,6 +15,7 @@ An end-to-end IT support automation system that **classifies, routes, and resolv
                   ┌────────────▼─────────────┐
                   │   FastAPI Gateway          │
                   │  Auth · Tickets · Messaging│
+                  │       (server.py)           │
                   └────────────┬─────────────┘
                                │
               ┌────────────────┼────────────────┐
@@ -76,7 +77,7 @@ IT_ticket_solver/
 │   └── lib/                     # Shared API client
 │
 ├── backend/
-│   ├── server.py                # Unified FastAPI (API + LangGraph pipeline)
+│   ├── server.py                # Unified FastAPI server (API + LangGraph pipeline)
 │   ├── ai_router_agent/         # Groq-powered ticket classifier
 │   ├── action_path/             # n8n automation workflows
 │   ├── rag_path/                # ChromaDB + LLM RAG pipeline
