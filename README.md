@@ -202,6 +202,38 @@ Open `http://localhost:3000` in your browser. You'll be redirected to the login 
 
 ---
 
+## AI Telemetry & Performance Monitoring
+
+The system includes a custom **Telemetry Engine** that tracks 4 key performance metrics for the AI pipeline. These are visible on the **Admin Insights** dashboard.
+
+### 1. Context Grounding Ratio (CGR)
+*   **Definition:** Measures how much of the RAG (FAQ) answer is derived from the retrieved knowledge base vs. the LLM's general knowledge.
+*   **Formula:** `Tokens from Context / Total Response Tokens`
+*   **Goal:** High CGR (>70%) indicates the AI is grounding its answers in your verified documentation, reducing hallucinations.
+
+### 2. Routing Precision Index (RPI)
+*   **Definition:** Evaluates the accuracy of the **AI Router Agent**. It tracks if the first-assigned path (Action, FAQ, or Complex) was the final successful path.
+*   **Formula:** `(Tickets resolved in first path / Total tickets) * 100`
+*   **Goal:** High RPI (>90%) shows the classifier is correctly identifying ticket intent on the first try.
+
+### 3. Human Labor Offset (HLO)
+*   **Definition:** The "Automation ROI" metric. It calculates the percentage of tickets fully resolved by AI (Action + FAQ) without human intervention.
+*   **Formula:** `(Automated Resolutions / Total Monthly Tickets) * 100`
+*   **Goal:** Higher HLO means more workload is diverted away from your human IT staff.
+
+### 4. Semantic Search Efficiency (SSE)
+*   **Definition:** Evaluates the technical health of the **ChromaDB Vector Store**. It combines vector proximity (how "close" the search was) with the LLM's confidence.
+*   **Formula:** `(1 - Avg Vector Distance / Threshold) * Confidence Score`
+*   **Goal:** A score near 1.0 indicates that your knowledge base contains highly relevant answers for the user queries being raised.
+
+| Metric Monitoring | |
+|---|---|
+| **API Endpoint** | `GET /api/metrics?hlo_days=30` |
+| **Frontend View** | Admin Dashboard > Performance Insights |
+| **Storage** | Persisted on each `Ticket` database row for historical tracking |
+
+---
+
 ## Backend Microservices
 
 ### Unified Server (`server.py`)

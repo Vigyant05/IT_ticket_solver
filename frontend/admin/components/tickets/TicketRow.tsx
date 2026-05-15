@@ -7,7 +7,7 @@ import { formatTimeAgo, cn } from '@admin/lib/utils';
 import { useTicketStore } from '@admin/store/ticketStore';
 import { toast } from 'sonner';
 import { ChevronDown, Trash2, Loader2 } from 'lucide-react';
-import { useDeleteTicket } from '@admin/hooks/useTickets';
+import { useDeleteTicket, useUpdateTicket } from '@admin/hooks/useTickets';
 
 const STATUS_OPTIONS: { label: string; value: Ticket['status'] }[] = [
   { label: 'Critical', value: 'critical' },
@@ -100,24 +100,28 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const { mutate: updateTicketDb } = useUpdateTicket();
+
   const handleStatusChange = useCallback(
     (newStatus: Ticket['status']) => {
       const previousStatus = ticket.status;
       // Optimistic update
       updateTicketStatus(ticket.id, newStatus);
       setShowStatusMenu(false);
-      toast.success(`Ticket ${ticket.ticketNumber} status updated`, {
-        description: `→ ${STATUS_OPTIONS.find((s) => s.value === newStatus)?.label}`,
-        action: {
-          label: 'Undo',
-          onClick: () => {
-            updateTicketStatus(ticket.id, previousStatus);
-            toast.info('Status change reverted');
-          },
+      
+      updateTicketDb({ ticketId: ticket.id, data: { status: newStatus } }, {
+        onSuccess: () => {
+          toast.success(`Ticket ${ticket.ticketNumber} status updated`, {
+            description: `→ ${STATUS_OPTIONS.find((s) => s.value === newStatus)?.label}`,
+          });
         },
+        onError: () => {
+          updateTicketStatus(ticket.id, previousStatus);
+          toast.error('Failed to update ticket status');
+        }
       });
     },
-    [ticket.id, ticket.ticketNumber, ticket.status, updateTicketStatus]
+    [ticket.id, ticket.ticketNumber, ticket.status, updateTicketStatus, updateTicketDb]
   );
 
   return (
@@ -213,8 +217,11 @@ export function TicketRow({ ticket, index }: TicketRowProps) {
       </td>
 
       {/* Last Message */}
-      <td className="px-4 py-4 whitespace-nowrap">
-        <p className="text-sm text-muted-foreground">{formatTimeAgo(ticket.updatedAt)}</p>
+      <td className="px-4 py-4 max-w-[200px]">
+        <p className="text-sm text-foreground truncate" title={ticket.status.includes('resolved') ? ticket.resolutionNotes : ticket.lastMessage}>
+          {ticket.status.includes('resolved') ? ticket.resolutionNotes || ticket.lastMessage : ticket.lastMessage}
+        </p>
+        <p className="text-xs text-muted-foreground mt-0.5">{formatTimeAgo(ticket.updatedAt)}</p>
       </td>
     </tr>
     {isExpanded && (

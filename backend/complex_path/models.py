@@ -42,6 +42,12 @@ class Ticket(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
 
+    # ── Telemetry columns ────────────────────────────────────────────
+    initial_intent  = Column(String, nullable=True)   # RPI: classifier's first decision
+    cgr_score       = Column(Float,  nullable=True)   # CGR: context_tokens / total_tokens
+    sse_score       = Column(Float,  nullable=True)   # SSE: (1 - avg_dist/threshold) * confidence
+    sse_distances   = Column(JSON,   nullable=True)   # SSE: raw top-K ChromaDB distances
+
     assigned_agent = relationship("Employee", foreign_keys=[assigned_employee_id], back_populates="tickets")
     requester = relationship("Employee", foreign_keys=[requester_id])
 

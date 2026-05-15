@@ -158,6 +158,12 @@ class TicketState(TypedDict):
     intent: Optional[str]
     resolution: Optional[Dict[str, Any]]
     status: str
+    # ── Telemetry fields ──────────────────────────────────────────────
+    initial_intent:     Optional[str]         # RPI: frozen at classify_node
+    cgr_context_tokens: Optional[int]         # CGR: tokens from retrieved context
+    cgr_total_tokens:   Optional[int]         # CGR: total tokens in response
+    sse_distances:      Optional[List[float]] # SSE: top-K ChromaDB distances
+    sse_confidence:     Optional[float]       # SSE: heuristic confidence [0.0–1.0]
 
 
 def classify_node(state: TicketState) -> TicketState:
@@ -168,6 +174,7 @@ def classify_node(state: TicketState) -> TicketState:
     else:
         intent = "Complex"  # safe fallback
     state["intent"] = intent
+    state["initial_intent"] = intent   # ← frozen snapshot for RPI (never overwritten)
     print(f"[Brain] Intent → {intent}")
     return state
 
@@ -201,11 +208,29 @@ def faq_node(state: TicketState) -> TicketState:
         )
         response.raise_for_status()
         rag_data = response.json()
+
+        context_text = rag_data.get("retrieved_context", "")
+        answer_text  = rag_data.get("generated_answer", "No answer generated.")
+        llm_used     = rag_data.get("llm_used", False)
+        metrics      = rag_data.get("metrics", {})
+
+        # ── CGR: word-level token approximation ───────────────────────
+        ctx_words   = len(context_text.split())
+        total_words = len((context_text + " " + answer_text).split())
+        state["cgr_context_tokens"] = ctx_words
+        state["cgr_total_tokens"]   = max(total_words, 1)
+
+        # ── SSE: distances + heuristic confidence ─────────────────────
+        distances = metrics.get("distances", [])
+        state["sse_distances"] = distances
+        no_context = "No relevant past tickets" in context_text
+        state["sse_confidence"] = 1.0 if (llm_used and not no_context) else 0.4
+
         state["resolution"] = {
             "path": "FAQ",
-            "answer": rag_data.get("generated_answer", "No answer generated."),
-            "context_used": rag_data.get("llm_used", False),
-            "rag_metrics": rag_data.get("metrics", {}),
+            "answer": answer_text,
+            "context_used": llm_used,
+            "rag_metrics": metrics,
         }
         state["status"] = "faq_resolved"
         print("[Brain] RAG answered successfully.")
@@ -216,6 +241,11 @@ def faq_node(state: TicketState) -> TicketState:
             "error": f"RAG knowledge base unreachable ({RAG_API_URL}). Ensure rag_path/app.py is running on port 8002.",
         }
         state["status"] = "failed_faq"
+        # Zero-out telemetry on failure
+        state["cgr_context_tokens"] = 0
+        state["cgr_total_tokens"]   = 1
+        state["sse_distances"]      = []
+        state["sse_confidence"]     = 0.0
     return state
 
 
@@ -329,6 +359,12 @@ def submit_ticket(req: PipelineTicketRequest, db: Session = Depends(get_db)):
         "intent": None,
         "resolution": None,
         "status": "received",
+        # telemetry — populated by nodes
+        "initial_intent": None,
+        "cgr_context_tokens": None,
+        "cgr_total_tokens": None,
+        "sse_distances": None,
+        "sse_confidence": None,
     }
 
     try:
@@ -352,6 +388,23 @@ def submit_ticket(req: PipelineTicketRequest, db: Session = Depends(get_db)):
         if db_ticket.status not in ("assigned", "pending_assignment"):
             db_ticket.status = final_state.get("status", "open")
 
+        # ── Persist telemetry ─────────────────────────────────────────
+        SSE_THRESHOLD = 0.8
+
+        db_ticket.initial_intent = final_state.get("initial_intent")
+
+        ctx_tokens   = final_state.get("cgr_context_tokens") or 0
+        total_tokens = final_state.get("cgr_total_tokens") or 1
+        db_ticket.cgr_score = round(ctx_tokens / total_tokens, 4) if total_tokens > 0 else None
+
+        distances  = final_state.get("sse_distances") or []
+        confidence = final_state.get("sse_confidence") or 0.0
+        db_ticket.sse_distances = distances
+        if distances:
+            avg_dist = sum(distances) / len(distances)
+            db_ticket.sse_score = round((1 - avg_dist / SSE_THRESHOLD) * confidence, 4)
+        # ─────────────────────────────────────────────────────────────
+
         db.commit()
 
         return {
@@ -365,6 +418,28 @@ def submit_ticket(req: PipelineTicketRequest, db: Session = Depends(get_db)):
         db_ticket.status = "open"
         db.commit()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ===========================================================================
+# AI Telemetry Metrics Endpoint
+# ===========================================================================
+
+import sys as _sys
+import os as _os
+_sys.path.insert(0, _os.path.dirname(__file__))  # ensure telemetry.py is found
+from telemetry import TelemetryEngine
+
+@app.get("/api/metrics")
+def get_ai_metrics(hlo_days: int = 30, db: Session = Depends(get_db)):
+    """
+    Returns the 4 AI telemetry metrics for the Admin Insights panel.
+    - CGR: Context Grounding Ratio
+    - RPI: Routing Precision Index
+    - HLO: Human Labor Offset (configurable window via ?hlo_days=N)
+    - SSE: Semantic Search Efficiency
+    """
+    engine = TelemetryEngine(db)
+    return engine.compute_all(hlo_days=hlo_days)
 
 
 # ===========================================================================
@@ -439,10 +514,9 @@ def get_me(token: str):
 def get_admin_stats(db: Session = Depends(get_db)):
     """Live dashboard statistics for admin."""
     total_tickets = db.query(models.Ticket).count()
-    open_tickets  = db.query(models.Ticket).filter(models.Ticket.status == "open").count()
-    in_progress   = db.query(models.Ticket).filter(models.Ticket.status == "in_progress").count()
-    assigned      = db.query(models.Ticket).filter(models.Ticket.status == "assigned").count()
-    resolved      = db.query(models.Ticket).filter(models.Ticket.status == "resolved").count()
+    open_tickets  = db.query(models.Ticket).filter(models.Ticket.status.in_(["open", "failed_faq", "failed_complex", "received"])).count()
+    in_progress   = db.query(models.Ticket).filter(models.Ticket.status.in_(["in_progress", "assigned", "assigned_complex", "pending_assignment"])).count()
+    resolved      = db.query(models.Ticket).filter(models.Ticket.status.in_(["resolved", "faq_resolved", "action_path_resolved", "complex_path_resolved", "closed"])).count()
     total_employees = db.query(models.Employee).filter(
         models.Employee.role != "User",
         models.Employee.role != "Admin",
@@ -451,7 +525,7 @@ def get_admin_stats(db: Session = Depends(get_db)):
     return {
         "total_tickets": total_tickets,
         "open_tickets": open_tickets,
-        "in_progress": in_progress + assigned,
+        "in_progress": in_progress,
         "resolved": resolved,
         "total_employees": total_employees,
     }

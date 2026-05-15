@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchAllTickets, fetchAdminStats, resolveTicket as resolveTicketApi, deleteTicket as deleteTicketApi } from '@lib/api';
+import { fetchAllTickets, fetchAdminStats, resolveTicket as resolveTicketApi, deleteTicket as deleteTicketApi, updateTicket as updateTicketApi } from '@lib/api';
 import { useTicketStore } from '@admin/store/ticketStore';
 
 // Convert backend ticket format to frontend format
@@ -116,6 +116,18 @@ export function useDeleteTicket() {
 
   return useMutation({
     mutationFn: (ticketId: string | number) => deleteTicketApi(ticketId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['all-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+  });
+}
+
+export function useUpdateTicket() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ ticketId, data }: { ticketId: string | number; data: any }) => updateTicketApi(ticketId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
