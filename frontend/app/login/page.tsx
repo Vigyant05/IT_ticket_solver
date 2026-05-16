@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { cn } from '@login/lib/utils';
 import { User, Shield, Briefcase, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -49,10 +50,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white text-zinc-900 selection:bg-zinc-100 font-sans">
       <div className="w-full max-w-md px-8 py-12 flex flex-col items-center">
-        {/* Project Title */}
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-12 text-center text-[#1e2a35] font-manrope">
-          IT Ticket Solver
-        </h1>
+        {/* Logo + App Name */}
+        <div className="flex flex-col items-center gap-3 mb-12">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg">
+            <Image src="/logo.png" alt="HALO Support" width={64} height={64} className="object-contain w-full h-full" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-center text-[#1e2a35]" style={{ fontFamily: 'var(--font-outfit, sans-serif)' }}>
+            HALO Support
+          </h1>
+          <p className="text-sm text-[#8a8a8c] tracking-wide">Helpdesk Automation and Logic Operations</p>
+        </div>
 
         {/* Role Selection */}
         <div className="w-full mb-10">

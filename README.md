@@ -1,49 +1,51 @@
-# IT Ticket Solver
+# HALO Support
 
-An end-to-end IT support automation system that **classifies, routes, and resolves** incoming tickets using AI. The platform features a **Unified LangGraph Pipeline** on the backend for intelligent ticket routing, paired with a **Next.js dashboard** for Admin, Employee, and User workflows — all connected to a live PostgreSQL/SQLite database.
+> **H**elpdesk **A**utomation and **L**ogic **O**perations
+
+An end-to-end AI-driven IT support platform that **classifies, routes, and resolves** incoming tickets with zero manual dispatch. Built on a unified **LangGraph pipeline** backend and a three-portal **Next.js** frontend for Admins, Employees, and Users.
 
 ---
 
 ## Architecture Overview
 
 ```
-                  ┌──────────────────────────┐
-                  │     Next.js Frontend      │
-                  │  (Admin / Employee / User) │
-                  └────────────┬─────────────┘
-                               │ REST API
-                  ┌────────────▼─────────────┐
-                  │   FastAPI Gateway          │
-                  │  Auth · Tickets · Messaging│
-                  │       (server.py)           │
-                  └────────────┬─────────────┘
-                               │
-              ┌────────────────┼────────────────┐
-              ▼                ▼                ▼
-     ┌────────────┐   ┌──────────────┐   ┌──────────────┐
-     │ Action Path │   │   RAG Path   │   │ Complex Path │
-     │  (n8n Auto) │   │ (ChromaDB +  │   │ (Human Expert│
-     │             │   │  LLM w/      │   │  Routing +   │
-     │             │   │  Fallback)   │   │  Messaging)  │
-     └────────────┘   └──────────────┘   └──────────────┘
+                  ┌─────────────────────────────┐
+                  │      Next.js Frontend         │
+                  │   Admin · Employee · User     │
+                  └─────────────┬───────────────┘
+                                │ REST / JSON
+                  ┌─────────────▼───────────────┐
+                  │     FastAPI Gateway           │
+                  │  Auth · Tickets · Messaging   │
+                  │        (server.py)             │
+                  └─────────────┬───────────────┘
+                                │ LangGraph Orchestration
+          ┌─────────────────────┼─────────────────────┐
+          ▼                     ▼                     ▼
+ ┌────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+ │  Action Path   │   │    RAG Path      │   │  Complex Path    │
+ │  n8n Webhook   │   │  ChromaDB + LLM  │   │  Human Expert    │
+ │  (Automation)  │   │  (FAQ Resolver)  │   │  (Skill Routing) │
+ └────────────────┘   └──────────────────┘   └──────────────────┘
 ```
 
-**AI Router Agent** (Groq LPU) classifies every ticket and the **LangGraph Brain** routes it to the correct microservice path.
+The **AI Router Agent** (Groq LPU) classifies every incoming ticket. The **LangGraph Brain** then dispatches it to the correct microservice path — fully automatically.
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | **Frontend** | Next.js 16, React 19, TypeScript, TailwindCSS 4, Zustand, TanStack Query |
 | **Backend API** | Python, FastAPI, SQLAlchemy, Uvicorn |
-| **AI / LLM** | Ollama Cloud Qwen 3.5 (primary), Groq Llama 3.3 70B (fallback) |
-| **Orchestration** | LangGraph (Unified Pipeline) |
-| **Automation** | n8n (Action Path workflows) |
-| **Vector DB** | ChromaDB (RAG Path) |
-| **Database** | SQLite (default, swappable to PostgreSQL) |
-| **Messaging** | Real-time ticket-based chat (User ↔ Employee) |
+| **AI / LLM** | Groq LPU — Llama 4 Scout (router), Llama 3.1 8B (pipeline) |
+| **RAG LLM** | Ollama Cloud Qwen 3.5 (primary) → Groq Llama 3.3 70B (fallback) |
+| **Orchestration** | LangGraph (unified state-machine pipeline) |
+| **Automation** | n8n (Action Path webhook workflows) |
+| **Vector DB** | ChromaDB (semantic search for RAG knowledge base) |
+| **Database** | SQLite (default, swappable to PostgreSQL via `DATABASE_URL`) |
+| **Fonts** | Inter · Manrope · Outfit (Google Fonts) |
 
 ---
 
@@ -51,45 +53,50 @@ An end-to-end IT support automation system that **classifies, routes, and resolv
 
 ```
 IT_ticket_solver/
-├── frontend/                    # Next.js Dashboard
+├── logo.png                         # HALO Support brand logo
+│
+├── frontend/                        # Next.js monorepo dashboard
 │   ├── app/
-│   │   ├── auth/                # AuthContext, ProtectedRoute
-│   │   ├── login/               # Login page
-│   │   ├── admin/               # Admin dashboard pages
-│   │   │   ├── tickets/         # Ticket management + resolution notes
-│   │   │   ├── insights/        # System performance analytics
-│   │   │   ├── employees/       # Staff directory
-│   │   │   └── chatbot/         # Employee messaging
-│   │   ├── employees/           # Employee dashboard pages
-│   │   │   ├── resolve/         # Ticket resolution chat
-│   │   │   ├── active/          # Active assigned tickets
-│   │   │   ├── history/         # Ticket history
-│   │   │   ├── chatbot/         # Staff messaging
-│   │   │   └── profile/         # Employee profile
-│   │   └── user/                # User dashboard pages
-│   │       ├── dashboard/       # Quick overview + raise tickets
-│   │       ├── support/         # AI Support Assistant (FAQ + ticket creation)
-│   │       ├── messaging/       # Direct chat with assigned IT agents
-│   │       └── history/         # Ticket tracking with "Solved By" attribution
-│   ├── admin/                   # Admin components, hooks, store
-│   ├── employees/               # Employee components, store
-│   ├── user/                    # User components, store
-│   └── lib/                     # Shared API client
+│   │   ├── auth/                    # AuthContext + ProtectedRoute
+│   │   ├── login/                   # Login page (role selector)
+│   │   ├── admin/                   # Admin portal
+│   │   │   ├── tickets/             # Ticket list + reassign + status
+│   │   │   ├── insights/            # AI telemetry + performance analytics
+│   │   │   ├── employees/           # Staff directory
+│   │   │   └── chatbot/             # Employee messaging
+│   │   ├── employees/               # Employee portal
+│   │   │   ├── resolve/             # Active ticket resolution chat
+│   │   │   ├── history/             # Resolved ticket history
+│   │   │   ├── chatbot/             # Staff messaging
+│   │   │   └── profile/             # Employee profile + stats
+│   │   └── user/                    # User portal
+│   │       ├── dashboard/           # Ticket overview + quick-raise
+│   │       ├── support/             # AI Support chat (pipeline entry)
+│   │       ├── messaging/           # Direct chat with assigned agents
+│   │       └── history/             # Ticket history with "Solved By"
+│   ├── admin/                       # Admin-scoped components, hooks, store
+│   ├── employees/                   # Employee-scoped components, store
+│   ├── user/                        # User-scoped components, store
+│   ├── lib/                         # Shared API client (api.ts)
+│   └── public/
+│       └── logo.png                 # Served logo asset
 │
 ├── backend/
-│   ├── server.py                # Unified FastAPI server (API + LangGraph pipeline)
-│   ├── ai_router_agent/         # Groq-powered ticket classifier
-│   ├── action_path/             # n8n automation workflows
-│   ├── rag_path/                # ChromaDB + LLM RAG pipeline
-│   │   └── app.py               # Ollama Cloud → Groq fallback LLM
-│   ├── complex_path/            # Human expert routing engine
-│   │   ├── models.py            # SQLAlchemy models (Employee, Ticket, ChatMessage)
-│   │   ├── database.py          # DB connection setup
-│   │   ├── routing_engine.py    # Skill-based agent assignment
-│   │   └── seed_data.py         # Seed employees + 25 tickets into database
-│   └── requirements.txt
+│   ├── server.py                    # Unified FastAPI + LangGraph server
+│   ├── telemetry.py                 # TelemetryEngine (CGR, RPI, HLO, SSE)
+│   ├── requirements.txt
+│   ├── ai_router_agent/             # Groq LPU ticket classifier
+│   ├── action_path/                 # n8n webhook integration
+│   ├── rag_path/                    # ChromaDB + LLM RAG pipeline
+│   │   ├── app.py                   # FastAPI RAG API (port 8002)
+│   │   └── ingest_data.py           # Load historical data into ChromaDB
+│   └── complex_path/                # Human expert routing engine
+│       ├── models.py                # SQLAlchemy: Employee, Ticket, ChatMessage
+│       ├── database.py              # DB connection (SQLite / PostgreSQL)
+│       ├── routing_engine.py        # Skill + load-based agent assignment
+│       └── seed_data.py             # Seed 25 employees + 25 tickets
 │
-└── dataset/                     # Training/test ticket datasets
+└── dataset/                         # RAG training data + test datasets
 ```
 
 ---
@@ -97,31 +104,36 @@ IT_ticket_solver/
 ## Quick Start
 
 ### Prerequisites
-- **Python 3.10+** with pip
-- **Node.js 18+** with npm
-- **Groq API Key** (for AI Router + Complex Path + RAG fallback)
-- **Ollama API Key** *(optional, for RAG Path primary LLM)*
+- **Python 3.10+** with `pip`
+- **Node.js 18+** with `npm`
+- **Groq API Key** — [console.groq.com](https://console.groq.com) (free tier available)
+- **Ollama API Key** *(optional)* — for RAG primary LLM; system auto-falls back to Groq
+
+---
 
 ### 1. Backend Setup
 
 ```bash
-# Install Python dependencies
 cd backend
+
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Create .env files for each path
+# Configure environment variables
 echo "GROQ_API_KEY=your_groq_key" > ai_router_agent/.env
 echo "GROQ_API_KEY=your_groq_key" > complex_path/.env
 
-# RAG path — Ollama Cloud (primary) + Groq (fallback)
+# RAG path — Ollama Cloud primary, Groq fallback
 cat > rag_path/.env << EOF
 OLLAMA_API_KEY=your_ollama_key
 GROQ_API_KEY=your_groq_key
 EOF
 
-# Seed the employee database (25 employees + 25 tickets)
+# Seed the database (25 employees + 25 test tickets)
 cd complex_path && python seed_data.py && cd ..
 ```
+
+---
 
 ### 2. Frontend Setup
 
@@ -129,6 +141,8 @@ cd complex_path && python seed_data.py && cd ..
 cd frontend
 npm install
 ```
+
+---
 
 ### 3. Run the Application
 
@@ -138,18 +152,23 @@ Open **three terminals**:
 # Terminal 1 — Unified Backend (API + AI Pipeline)
 cd backend
 PYTHONPATH=complex_path python server.py
-# → API + pipeline running at http://localhost:8000
+# → Serving on http://localhost:8000
+# → Swagger Docs: http://localhost:8000/docs
 ```
 
 ```bash
 # Terminal 2 — RAG Knowledge Base
 cd backend/rag_path
+
+# First run only — ingest historical ticket data into ChromaDB
+python ingest_data.py
+
+# Start the RAG API
 uvicorn app:app --port 8002 --reload
-# → RAG API at http://localhost:8002
-# On startup you'll see which LLM was selected:
-#   [LLM] ✅ Ollama Cloud connected — using Qwen 3.5
-#   or
-#   [LLM] ✅ Groq connected — using Llama 3.3 70B
+# → Serving on http://localhost:8002
+# You will see either:
+#   [LLM] ✅ Ollama Cloud — Qwen 3.5
+#   [LLM] ✅ Groq fallback — Llama 3.3 70B
 ```
 
 ```bash
@@ -159,191 +178,175 @@ npm run dev
 # → Dashboard at http://localhost:3000
 ```
 
-Open `http://localhost:3000` in your browser. You'll be redirected to the login page.
+Navigate to `http://localhost:3000` — you will be redirected to the login page.
 
 ---
 
 ## Login Credentials
 
-| Role | Name | Email | Password |
-|------|------|-------|----------|
-| **Admin** | Admin_System | admin@msrit.com | 12345 |
-| **User** | Aditi | aditi@msrit.com | 12345 |
-| **User** | Kavya | kavya@msrit.com | 12345 |
-| **User** | Abhishek | abhishek@msrit.com | 12345 |
-| **Employee** | Vigyant N | veryone@msrit.com | 12345 |
-| **Employee** | *(25 IT staff)* | *(see seed_data.py)* | 12345 |
+All accounts use password **`12345`**.
+
+| Role | Name | Email |
+|------|------|-------|
+| **Admin** | Admin\_System | admin@msrit.com |
+| **User** | Aditi | aditi@msrit.com |
+| **User** | Kavya | kavya@msrit.com |
+| **User** | Abhishek | abhishek@msrit.com |
+| **Employee** | Vigyant N | veryone@msrit.com |
+| **Employee** | *(25 IT staff)* | *(see `seed_data.py`)* |
 
 ---
 
-## Dashboard Features
+## Feature Overview
 
-### Admin Dashboard
-- **Tickets** — View all tickets with pagination, search, status filtering, and expandable resolution notes
-- **Insights** — Live performance analytics: total tickets, resolution rate, team distribution, and category breakdown
-- **Employees** — Staff directory showing real-time availability, skill levels, and current ticket load
-- **Messaging** — Direct messaging with all IT employees
-- **Logout** — Clears session and redirects to login
+### Admin Portal
 
-### Employee Dashboard
-- **Profile** — Personalized profile with expertise tags and performance stats
-- **Active Tickets** — Tickets assigned to the logged-in employee
-- **Ticket History** — Complete history of all assigned tickets
-- **Resolve** — Chat interface for working on ticket resolution (with "Resolve Ticket" action)
-- **Messaging** — Peer-to-peer staff messaging
-- **Logout** — Clears session and redirects to login
-
-### User Dashboard
-- **Dashboard** — Quick overview of total/open/resolved tickets with "New Request" quick-raise
-- **AI Support** — Chat-based AI assistant that classifies and routes tickets through the pipeline
-- **Messaging** — Direct chat with assigned IT agents for complex tickets (agents auto-appear when assigned, auto-disappear when resolved)
-- **History** — Full ticket tracking with "Solved By" attribution (N8n / RAG Agent / Employee Name)
-- **Logout** — Clears session and redirects to login
-
----
-
-## AI Telemetry & Performance Monitoring
-
-The system includes a custom **Telemetry Engine** that tracks 4 key performance metrics for the AI pipeline. These are visible on the **Admin Insights** dashboard.
-
-### 1. Context Grounding Ratio (CGR)
-*   **Definition:** Measures how much of the RAG (FAQ) answer is derived from the retrieved knowledge base vs. the LLM's general knowledge.
-*   **Formula:** `Tokens from Context / Total Response Tokens`
-*   **Goal:** High CGR (>70%) indicates the AI is grounding its answers in your verified documentation, reducing hallucinations.
-
-### 2. Routing Precision Index (RPI)
-*   **Definition:** Evaluates the accuracy of the **AI Router Agent**. It tracks if the first-assigned path (Action, FAQ, or Complex) was the final successful path.
-*   **Formula:** `(Tickets resolved in first path / Total tickets) * 100`
-*   **Goal:** High RPI (>90%) shows the classifier is correctly identifying ticket intent on the first try.
-
-### 3. Human Labor Offset (HLO)
-*   **Definition:** The "Automation ROI" metric. It calculates the percentage of tickets fully resolved by AI (Action + FAQ) without human intervention.
-*   **Formula:** `(Automated Resolutions / Total Monthly Tickets) * 100`
-*   **Goal:** Higher HLO means more workload is diverted away from your human IT staff.
-
-### 4. Semantic Search Efficiency (SSE)
-*   **Definition:** Evaluates the technical health of the **ChromaDB Vector Store**. It combines vector proximity (how "close" the search was) with the LLM's confidence.
-*   **Formula:** `(1 - Avg Vector Distance / Threshold) * Confidence Score`
-*   **Goal:** A score near 1.0 indicates that your knowledge base contains highly relevant answers for the user queries being raised.
-
-| Metric Monitoring | |
+| Feature | Details |
 |---|---|
-| **API Endpoint** | `GET /api/metrics?hlo_days=30` |
-| **Frontend View** | Admin Dashboard > Performance Insights |
-| **Storage** | Persisted on each `Ticket` database row for historical tracking |
+| **Ticket Dashboard** | Paginated table with search, status filtering, and expandable resolution notes |
+| **Reassign Agent** | Click any agent cell → searchable dropdown listing all employees with team tag (L1/L2/SEC…), role, availability, and current load |
+| **Status Management** | Inline dropdown to update ticket status; changes are persisted to the database |
+| **Delete Ticket** | Permanently remove a ticket with load adjustment on the assigned agent |
+| **Insights Dashboard** | Live resolution rate, total tickets, active employees, AI telemetry gauges |
+| **Employee Directory** | Real-time availability, skill level, expertise tags, and current load per agent |
+| **Messaging** | Direct chat with any IT employee |
+
+### Employee Portal
+
+| Feature | Details |
+|---|---|
+| **Resolve** | Full chat interface for working on active tickets; one-click "Resolve" that auto-saves resolution notes |
+| **History** | All resolved tickets with resolution notes |
+| **Profile** | Expertise tags, skill level, and ticket performance stats |
+| **Messaging** | Peer-to-peer internal messaging |
+
+### User Portal
+
+| Feature | Details |
+|---|---|
+| **AI Support** | Chat-based assistant; classifies the issue and routes through the pipeline automatically |
+| **Dashboard** | Quick overview of open/resolved tickets with a one-click "New Request" button |
+| **Messaging** | Direct chat with the assigned IT agent (agent card auto-appears when assigned, auto-disappears when resolved) |
+| **History** | Full ticket tracking with **"Solved By"** attribution — N8n / RAG Agent / Employee Name |
 
 ---
 
-## Backend Microservices
+## AI Pipeline
 
-### Unified Server (`server.py`)
-A single FastAPI app that serves the frontend REST API **and** the LangGraph AI routing pipeline.
+### Ticket Lifecycle
 
-```bash
-cd backend
-PYTHONPATH=complex_path python server.py
-# Docs: http://localhost:8000/docs
+```
+User submits ticket
+       │
+       ▼
+ AI Router Agent (Groq)
+ Classifies: Action / FAQ / Complex
+       │
+   ┌───┴──────────────┐
+   ▼                  ▼                  ▼
+Action Path        FAQ Path           Complex Path
+(n8n webhook)   (ChromaDB RAG)     (Skill routing)
+auto-resolves   answers instantly   assigns human expert
+status: action_path_resolved        status: complex_path_resolved
+       └──────────────────────────────┘
+                    │
+         Telemetry captured + stored
 ```
 
-| Endpoint | Description |
-|----------|-------------|
-| `POST /submit_ticket` | AI-routes a ticket through classify → Action / FAQ / Complex |
-| `GET /api/*` | All frontend REST endpoints (auth, stats, employees, tickets, messaging) |
+### LLM Fallback Strategy (RAG Path)
 
-### 1. Action Path (n8n Automation)
-Handles simple, automatable tickets (password resets, WiFi fixes) via n8n workflows.
-
-```bash
-# Setup: Import backend/action_path/MiniPrj.json into n8n
-# Then update the webhook URL in action_pipeline.py
-python action_pipeline.py --csv test_action_tickets.csv --limit 10 --production
 ```
-
-### 2. RAG Path (FAQ / Knowledge Base)
-Answers FAQ-type tickets by retrieving solutions from past tickets stored in ChromaDB.
-Run this on **port 8002** (the unified server occupies 8000).
-
-**LLM Fallback System:**
-```
-Startup → Try Ollama Cloud (Qwen 3.5 397B)
-            ↓ (fails? e.g. subscription, network)
-          → Fall back to Groq (Llama 3.3 70B Versatile)
-            ↓ (fails? e.g. API key missing)
-          → Raw retrieval only (no generation)
-```
-
-```bash
-cd backend/rag_path
-python ingest_data.py          # Load historical data (first run only)
-uvicorn app:app --port 8002    # Start RAG API
-```
-
-### 3. Complex Path (Human Expert Routing)
-Routes severe/complex tickets to the best-matched human expert based on skill matching and workload balancing.
-This is **built into `server.py`** — no separate process needed.
-
-```bash
-# Run standalone for testing only
-cd backend/complex_path
-uvicorn main:app --port 8001 --reload
-```
-
-### 4. AI Router Agent (Classifier)
-The Groq-powered LLM classifier that determines which path each ticket should take.
-Also **built into `server.py`** — no separate process needed.
-
-```bash
-# Run standalone for testing only
-cd backend/ai_router_agent
-python router_agent.py "I need a password reset"          # Single test
-python router_agent.py --csv test_tickets.csv              # Batch test
+Startup → Test Ollama Cloud (Qwen 3.5 397B)
+           ↓ (timeout / subscription error)
+         → Fall back to Groq (Llama 3.3 70B)
+           ↓ (API key missing)
+         → Raw ChromaDB retrieval only
 ```
 
 ---
 
-## API Endpoints
+## AI Telemetry Metrics
+
+The **Admin Insights** page exposes 4 real-time metrics powered by the `TelemetryEngine` in `telemetry.py`. Scores are computed at ticket-creation time and stored on each `Ticket` database row.
+
+API endpoint: `GET /api/metrics?hlo_days=30`
+
+| Metric | Abbreviation | Description | Formula |
+|---|---|---|---|
+| **Context Grounding Ratio** | CGR | How much of the RAG answer is sourced from the ChromaDB knowledge base vs. LLM general knowledge. High = less hallucination. | `Tokens from context / Total response tokens` |
+| **Routing Precision Index** | RPI | Accuracy of the AI Router Agent — did the first-assigned path resolve the ticket successfully? | `(Tickets resolved on first path / Total tickets) × 100` |
+| **Human Labor Offset** | HLO | Automation ROI — percentage of tickets fully resolved by AI (Action + FAQ paths) without human intervention. | `(Automated resolutions / Total monthly tickets) × 100` |
+| **Semantic Search Efficiency** | SSE | Health of the ChromaDB vector store — combines vector proximity with LLM confidence. Near 1.0 = highly relevant knowledge base. | `(1 − avg_distance / threshold) × confidence` |
+
+Each metric card on the dashboard is **colour-coded**: 🟢 ≥ 80% · 🟡 ≥ 50% · 🔴 < 50%.
+
+---
+
+## API Reference
 
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/login` | Authenticate with email + password + role |
+|---|---|---|
+| `POST` | `/api/login` | Authenticate (email + password + role) |
 | `POST` | `/api/logout` | Invalidate session token |
 | `GET` | `/api/admin/stats` | Dashboard statistics (ticket counts, resolution rate) |
-| `GET` | `/api/admin/tickets` | All tickets with agent info and resolution notes |
+| `GET` | `/api/admin/tickets` | All tickets with agent info and pipeline path |
 | `GET` | `/api/admin/employees` | Employee directory (excludes Users/Admin) |
 | `GET` | `/api/employee/{id}` | Single employee profile |
-| `GET` | `/api/employee/{id}/tickets` | Tickets assigned to specific employee |
-| `GET` | `/api/user/{id}/tickets` | Tickets raised by a specific user |
+| `GET` | `/api/employee/{id}/tickets` | Tickets assigned to an employee |
+| `GET` | `/api/user/{id}/tickets` | Tickets raised by a user |
 | `POST` | `/api/tickets` | Create a new ticket |
-| `PUT` | `/api/ticket/{id}` | Update ticket details |
-| `PUT` | `/api/ticket/{id}/resolve` | Mark ticket as resolved (auto-captures resolution notes) |
-| `DELETE` | `/api/ticket/{id}` | Delete a ticket |
-| `POST` | `/api/messages` | Send a message (ticket-based or direct) |
-| `GET` | `/api/messages` | Retrieve messages (by ticket_id, user1, or user2) |
+| `PUT` | `/api/ticket/{id}` | Update ticket fields (status, category, severity) |
+| `PUT` | `/api/ticket/{id}/resolve` | Mark ticket resolved (captures resolution notes) |
+| `POST` | `/api/ticket/{id}/reassign` | Reassign ticket to a new employee (adjusts load counts) |
+| `DELETE` | `/api/ticket/{id}` | Delete a ticket (adjusts agent load) |
+| `GET` | `/api/messages` | Retrieve messages (by ticket\_id, user1, or user2) |
+| `POST` | `/api/messages` | Send a message |
+| `GET` | `/api/metrics` | AI pipeline telemetry (CGR, RPI, HLO, SSE) |
 | `POST` | `/submit_ticket` | AI-route a ticket through the full pipeline |
 
 ---
 
 ## Key Design Decisions
 
+### Unified Server
+`server.py` acts as both the REST API gateway and the LangGraph orchestrator. There is no separate microservice hop for routing — the pipeline executes inside the same FastAPI process, keeping latency low and deployment simple.
+
 ### Messaging Architecture
-- **AI Support** (`/user/support`) — Strictly automated. Classifies tickets and returns AI-generated responses.
-- **Messaging** (`/user/messaging`) — Human-to-human. Users chat directly with their assigned IT agent.
-- **Agent Lifecycle** — Assigned agents auto-appear in the user's messaging sidebar; they auto-disappear when the ticket is resolved.
+- **AI Support** (`/user/support`) — Fully automated. The chat submits a ticket through the pipeline and returns the AI response.
+- **User Messaging** (`/user/messaging`) — Human-to-human. Users chat with their assigned IT agent in real time.
+- **Agent Lifecycle** — The assigned agent auto-appears in the user's sidebar after assignment and auto-disappears once the ticket is resolved.
 
-### Ticket Attribution
-The "Solved By" column in ticket history shows who resolved each ticket:
-- **N8n** — Action path (automated workflows)
-- **RAG Agent** — FAQ path (AI-generated answers)
-- **Employee Name** — Complex path (human expert)
+### Ticket Attribution ("Solved By")
+| Resolver | Trigger |
+|---|---|
+| **N8n** | Action path completed via webhook |
+| **RAG Agent** | FAQ path resolved by ChromaDB + LLM |
+| **Employee Name** | Complex path — human expert resolved |
 
-### LLM Fallback (RAG Path)
-On startup, the RAG server tests Ollama Cloud with a lightweight "Say OK" message. If it succeeds, Qwen 3.5 is used for generation. If it fails (subscription required, network error, etc.), Groq Llama 3.3 70B takes over automatically. Both API keys are kept in `.env`.
+### Reassignment Flow
+When an admin reassigns a ticket via the dropdown, the system atomically: decrements the previous agent's `current_load`, increments the new agent's `current_load`, updates `assigned_employee_id`, and sets the status to `assigned`.
+
+### Telemetry Persistence
+Metrics are computed once at ticket-creation/resolution time and stored on the `Ticket` row. The dashboard aggregates these pre-computed columns, keeping the `/api/metrics` query fast regardless of ticket volume.
 
 ---
 
 ## Security
 
-- **Token-based authentication** — Login returns a session token stored in `sessionStorage`
-- **Role-based access control** — `ProtectedRoute` component enforces Admin/Employee/User roles on every page
-- **Route protection** — Unauthenticated users are always redirected to `/login`
+- **Token-based authentication** — Login issues a session token stored in `sessionStorage`
+- **Role-based access control** — `ProtectedRoute` enforces Admin / Employee / User roles on every page
+- **Route protection** — Unauthenticated requests are always redirected to `/login`
 - **CORS configured** — Backend allows requests from `localhost:3000`
+- **Input validation** — FastAPI Pydantic models validate all request bodies
+
+---
+
+## Environment Variables Summary
+
+| File | Variable | Description |
+|---|---|---|
+| `ai_router_agent/.env` | `GROQ_API_KEY` | LLM router + classifier |
+| `complex_path/.env` | `GROQ_API_KEY` | Complex path LLM |
+| `complex_path/.env` | `DATABASE_URL` | *(optional)* PostgreSQL URL; defaults to SQLite |
+| `rag_path/.env` | `OLLAMA_API_KEY` | RAG primary LLM (Qwen 3.5) |
+| `rag_path/.env` | `GROQ_API_KEY` | RAG fallback LLM (Llama 3.3 70B) |

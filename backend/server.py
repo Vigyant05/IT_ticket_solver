@@ -743,6 +743,42 @@ def update_ticket(ticket_id: int, update: TicketUpdate, db: Session = Depends(ge
     return {"success": True, "ticket_id": ticket_id}
 
 
+@app.post("/api/ticket/{ticket_id}/reassign")
+def reassign_ticket(ticket_id: int, body: dict, db: Session = Depends(get_db)):
+    """Reassign a ticket to a different employee (admin action)."""
+    new_employee_id = body.get("employee_id")
+    if not new_employee_id:
+        raise HTTPException(status_code=400, detail="employee_id is required")
+
+    ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    new_emp = db.query(models.Employee).filter(models.Employee.id == new_employee_id).first()
+    if not new_emp:
+        raise HTTPException(status_code=404, detail="Employee not found")
+
+    # Decrement old agent's load
+    if ticket.assigned_employee_id and ticket.assigned_employee_id != new_employee_id:
+        old_emp = db.query(models.Employee).filter(models.Employee.id == ticket.assigned_employee_id).first()
+        if old_emp:
+            old_emp.current_load = max(0, old_emp.current_load - 1)
+
+    # Assign new agent and increment their load
+    ticket.assigned_employee_id = new_employee_id
+    ticket.status = "assigned"
+    new_emp.current_load = new_emp.current_load + 1
+
+    db.commit()
+    db.refresh(ticket)
+    return {
+        "success": True,
+        "ticket_id": ticket_id,
+        "assigned_agent_name": new_emp.name,
+        "assigned_employee_id": new_emp.id,
+    }
+
+
 @app.delete("/api/ticket/{ticket_id}")
 def delete_ticket(ticket_id: int, db: Session = Depends(get_db)):
     """Delete a ticket."""

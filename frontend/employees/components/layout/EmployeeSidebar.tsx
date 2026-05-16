@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Headphones,
   Clock,
   Moon,
   Sun,
-  Cpu,
   Ticket,
   User,
   LogOut,
@@ -46,13 +46,13 @@ export function EmployeeSidebar() {
       )}
     >
       {/* Logo */}
-      <div className="w-8 h-8 rounded-lg bg-primary flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer hover:opacity-90 transition-opacity">
-        <Cpu size={18} />
+      <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mb-1 cursor-pointer hover:opacity-90 transition-opacity shrink-0">
+        <Image src="/logo.png" alt="HALO Support" width={48} height={48} className="object-contain" />
       </div>
 
-      {/* App label */}
-      <div className="text-[8px] font-bold tracking-widest uppercase text-white/40 mb-5 text-center leading-tight">
-        AL<br />V2.4.0
+      {/* App Name */}
+      <div className="text-[9px] font-bold tracking-widest uppercase text-white/60 mb-5 text-center leading-tight" style={{ fontFamily: 'var(--font-outfit, sans-serif)' }}>
+        HALO<br />Support
       </div>
 
       {/* Main Nav */}

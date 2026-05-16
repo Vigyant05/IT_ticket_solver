@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   MessageSquare,
@@ -9,7 +10,6 @@ import {
   Users,
   Moon,
   Sun,
-  Cpu,
   LogOut,
 } from 'lucide-react';
 import { cn } from '@admin/lib/utils';
@@ -40,8 +40,13 @@ export function PrimarySidebar() {
       theme === 'dark' ? "bg-[#1f212a] text-muted-foreground" : "bg-[#353744] text-gray-400"
     )}>
       {/* Logo */}
-      <div className="w-8 h-8 rounded-lg bg-primary flex flex-col items-center justify-center text-white font-bold text-sm shadow-md mb-6 cursor-pointer hover:opacity-90 transition-opacity">
-        <Cpu size={18} />
+      <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mb-1 cursor-pointer hover:opacity-90 transition-opacity shrink-0">
+        <Image src="/logo.png" alt="HALO Support" width={48} height={48} className="object-contain" />
+      </div>
+
+      {/* App Name */}
+      <div className="text-[9px] font-bold tracking-widest uppercase text-white/60 mb-5 text-center leading-tight" style={{ fontFamily: 'var(--font-outfit, sans-serif)' }}>
+        HALO<br />Support
       </div>
 
       {/* Main Nav */}
@@ -89,7 +94,7 @@ export function PrimarySidebar() {
           <LogOut size={20} />
           <span className="text-[10px] font-medium leading-none">Logout</span>
         </button>
-        {/* Profile Avatar Placeholder */}
+        {/* Profile Avatar */}
         <div className="mt-2 py-3 w-full flex items-center justify-center">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 border-2 border-[#353744] shadow-sm flex items-center justify-center text-white text-[10px] font-bold">
             {user?.name?.charAt(0) || 'A'}
