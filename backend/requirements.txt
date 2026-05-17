@@ -1,6 +1,6 @@
 # --- Core Web & API ---
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
 python-multipart
 requests
@@ -10,21 +10,20 @@ tqdm>=4.60
 sqlalchemy
 psycopg2-binary
 chromadb
-faiss-cpu
-numpy
-google-cloud-storage>=2.10
 
 # --- AI & LLM Integration ---
 groq
 ollama
 langchain-core
 langchain-groq
-langgraph
 langchain-ollama
 langchain-openai
-google-cloud-aiplatform>=1.38
-google-generativeai>=0.5.2
+langgraph
+tiktoken
+
+# --- Embeddings & Vector Search ---
 sentence-transformers
+numpy
 
 # --- Data & Utilities ---
 python-dotenv
