@@ -39,9 +39,18 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
-parts/
+# Virtual environments (Python only — scoped to avoid blocking frontend lib/)
+/lib/
+/lib64/
+venv/lib/
+.venv/lib/
+env/lib/
+
+# Explicitly track all frontend lib directories
+!frontend/lib/
+!frontend/admin/lib/
+!frontend/employees/lib/
+!frontend/user/lib/
 sdist/
 var/
 wheels/
