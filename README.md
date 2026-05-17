@@ -350,3 +350,73 @@ Metrics are computed once at ticket-creation/resolution time and stored on the `
 | `complex_path/.env` | `DATABASE_URL` | *(optional)* PostgreSQL URL; defaults to SQLite |
 | `rag_path/.env` | `OLLAMA_API_KEY` | RAG primary LLM (Qwen 3.5) |
 | `rag_path/.env` | `GROQ_API_KEY` | RAG fallback LLM (Llama 3.3 70B) |
+
+> **Tip:** Each directory has a `.env.example` file. Copy it to `.env` and fill in your keys — no values need to be invented from scratch.
+
+---
+
+## Troubleshooting
+
+### `Module not found: Can't resolve '@admin/lib/utils'` (or any `@admin/lib/*`)
+
+This was caused by a `lib/` entry in `.gitignore` (inherited from Python venv templates) that silently blocked all frontend `lib/` directories from being committed. It has been fixed — pull the latest and run `npm install`.
+
+```bash
+git pull
+cd frontend && npm install && npm run dev
+```
+
+---
+
+### Backend import errors (`ModuleNotFoundError`)
+
+Make sure you install dependencies from the **root** `backend/requirements.txt` only — there are no sub-folder requirement files.
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+Common missing packages and their fix:
+
+| Error | Fix |
+|---|---|
+| `No module named 'groq'` | `pip install groq` |
+| `No module named 'tiktoken'` | `pip install tiktoken` |
+| `No module named 'dotenv'` | `pip install python-dotenv` |
+| `No module named 'langgraph'` | `pip install langgraph langchain-core langchain-groq` |
+| `No module named 'chromadb'` | `pip install chromadb sentence-transformers` |
+
+---
+
+### `sqlite3.OperationalError: no such table: tickets`
+
+The database has not been seeded. Run:
+
+```bash
+cd backend/complex_path
+python seed_data.py
+```
+
+---
+
+### RAG path returns empty responses
+
+The ChromaDB vector store is empty on a fresh clone (it is gitignored). Ingest the knowledge base first:
+
+```bash
+cd backend/rag_path
+python ingest_data.py
+uvicorn app:app --port 8002 --reload
+```
+
+---
+
+### Frontend logo missing (broken image)
+
+The logo is served from `frontend/public/logo.png`. If it's missing after cloning, copy it manually:
+
+```bash
+cp logo.png frontend/public/logo.png
+```
+
