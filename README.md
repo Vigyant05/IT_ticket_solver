@@ -113,6 +113,7 @@ IT_ticket_solver/
 
 ### 1. Backend Setup
 
+**For macOS/Linux:**
 ```bash
 cd backend
 
@@ -133,6 +134,24 @@ EOF
 cd complex_path && python seed_data.py && cd ..
 ```
 
+**For Windows (PowerShell):**
+```powershell
+cd backend
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Configure environment variables
+echo "GROQ_API_KEY=your_groq_key" > ai_router_agent/.env
+echo "GROQ_API_KEY=your_groq_key" > complex_path/.env
+
+# RAG path — Ollama Cloud primary, Groq fallback
+Set-Content -Path "rag_path/.env" -Value "OLLAMA_API_KEY=your_ollama_key`nGROQ_API_KEY=your_groq_key"
+
+# Seed the database (25 employees + 25 test tickets)
+cd complex_path; python seed_data.py; cd ..
+```
+
 ---
 
 ### 2. Frontend Setup
@@ -148,16 +167,27 @@ npm install
 
 Open **three terminals**:
 
+**Terminal 1 — Unified Backend (API + AI Pipeline)**
+
+*For macOS/Linux:*
 ```bash
-# Terminal 1 — Unified Backend (API + AI Pipeline)
 cd backend
 PYTHONPATH=complex_path python server.py
 # → Serving on http://localhost:8000
 # → Swagger Docs: http://localhost:8000/docs
 ```
 
+*For Windows (PowerShell):*
+```powershell
+cd backend
+$env:PYTHONPATH="complex_path"
+python server.py
+# → Serving on http://localhost:8000
+# → Swagger Docs: http://localhost:8000/docs
+```
+
+**Terminal 2 — RAG Knowledge Base** *(Same for all OS)*
 ```bash
-# Terminal 2 — RAG Knowledge Base
 cd backend/rag_path
 
 # First run only — ingest historical ticket data into ChromaDB
@@ -171,8 +201,8 @@ uvicorn app:app --port 8002 --reload
 #   [LLM] ✅ Groq fallback — Llama 3.3 70B
 ```
 
+**Terminal 3 — Frontend** *(Same for all OS)*
 ```bash
-# Terminal 3 — Frontend
 cd frontend
 npm run dev
 # → Dashboard at http://localhost:3000
@@ -361,9 +391,16 @@ Metrics are computed once at ticket-creation/resolution time and stored on the `
 
 This was caused by a `lib/` entry in `.gitignore` (inherited from Python venv templates) that silently blocked all frontend `lib/` directories from being committed. It has been fixed — pull the latest and run `npm install`.
 
+*For macOS/Linux:*
 ```bash
 git pull
 cd frontend && npm install && npm run dev
+```
+
+*For Windows (PowerShell):*
+```powershell
+git pull
+cd frontend; npm install; npm run dev
 ```
 
 ---
@@ -416,7 +453,13 @@ uvicorn app:app --port 8002 --reload
 
 The logo is served from `frontend/public/logo.png`. If it's missing after cloning, copy it manually:
 
+*For macOS/Linux:*
 ```bash
 cp logo.png frontend/public/logo.png
+```
+
+*For Windows (PowerShell):*
+```powershell
+Copy-Item logo.png -Destination frontend/public/logo.png
 ```
 

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard,
-  Headphones,
+  Ticket,
   MessageSquare,
   Clock,
   Moon,
@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 
 const navItems = [
   { label: 'Dashboard', href: '/user/dashboard', icon: LayoutDashboard },
-  { label: 'AI Support', href: '/user/support', icon: Headphones },
+  { label: 'Raise Ticket', href: '/user/support', icon: Ticket },
   { label: 'Messaging', href: '/user/messaging', icon: MessageSquare },
   { label: 'History', href: '/user/history', icon: Clock },
 ];
