@@ -101,60 +101,44 @@ IT_ticket_solver/
 
 ---
 
-## Quick Start
+## 🚀 Quick Start Guide
+
+Setting up HALO Support is easy. Just follow these 3 steps:
 
 ### Prerequisites
-- **Python 3.10+** with `pip`
-- **Node.js 18+** with `npm`
-- **Groq API Key** — [console.groq.com](https://console.groq.com) (free tier available)
-- **Ollama API Key** *(optional)* — for RAG primary LLM; system auto-falls back to Groq
+- **Python 3.10+** and **Node.js 18+**
+- A **Groq API Key** (get one for free at [console.groq.com](https://console.groq.com))
+*(Note: Ollama API key is fully optional. The system will cleanly fallback to Groq if omitted).*
 
 ---
 
-### 1. Backend Setup
+### 1. Configure the Backend (API & AI)
 
-**For macOS/Linux:**
+Open a terminal and run the following commands to install dependencies, set up your API keys, and prepare the databases:
+
 ```bash
 cd backend
-
-# Install Python dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
-echo "GROQ_API_KEY=your_groq_key" > ai_router_agent/.env
-echo "GROQ_API_KEY=your_groq_key" > complex_path/.env
+# Add your Groq API Key (replace "your_groq_key_here")
+echo "GROQ_API_KEY=your_groq_key_here" > ai_router_agent/.env
+echo "GROQ_API_KEY=your_groq_key_here" > complex_path/.env
+echo "GROQ_API_KEY=your_groq_key_here" > rag_path/.env
 
-# RAG path — Ollama Cloud primary, Groq fallback
-cat > rag_path/.env << EOF
-OLLAMA_API_KEY=your_ollama_key
-GROQ_API_KEY=your_groq_key
-EOF
-
-# Seed the database (25 employees + 25 test tickets)
+# Seed the database with sample employees and tickets
 cd complex_path && python seed_data.py && cd ..
+
+# Ingest historical data for the AI's Knowledge Base
+cd rag_path && python ingest_data.py && cd ..
 ```
 
-**For Windows (PowerShell):**
-```powershell
-cd backend
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Configure environment variables
-echo "GROQ_API_KEY=your_groq_key" > ai_router_agent/.env
-echo "GROQ_API_KEY=your_groq_key" > complex_path/.env
-
-# RAG path — Ollama Cloud primary, Groq fallback
-Set-Content -Path "rag_path/.env" -Value "OLLAMA_API_KEY=your_ollama_key`nGROQ_API_KEY=your_groq_key"
-
-# Seed the database (25 employees + 25 test tickets)
-cd complex_path; python seed_data.py; cd ..
-```
+*(Windows users: You can create the `.env` files manually in the `ai_router_agent`, `complex_path`, and `rag_path` folders with the line `GROQ_API_KEY=your_groq_key_here`)*
 
 ---
 
-### 2. Frontend Setup
+### 2. Configure the Frontend (Dashboard)
+
+Open a new terminal to install the Next.js dependencies:
 
 ```bash
 cd frontend
@@ -163,52 +147,33 @@ npm install
 
 ---
 
-### 3. Run the Application
+### 3. Start the Servers
 
-Open **three terminals**:
+You will need **three separate terminals** to run the platform.
 
-**Terminal 1 — Unified Backend (API + AI Pipeline)**
-
-*For macOS/Linux:*
+**Terminal 1: Start the Main API Server**
 ```bash
 cd backend
 PYTHONPATH=complex_path python server.py
-# → Serving on http://localhost:8000
-# → Swagger Docs: http://localhost:8000/docs
+# → API Serving on http://localhost:8000
 ```
+*(Windows: `cd backend` then `$env:PYTHONPATH="complex_path"` then `python server.py`)*
 
-*For Windows (PowerShell):*
-```powershell
-cd backend
-$env:PYTHONPATH="complex_path"
-python server.py
-# → Serving on http://localhost:8000
-# → Swagger Docs: http://localhost:8000/docs
-```
-
-**Terminal 2 — RAG Knowledge Base** *(Same for all OS)*
+**Terminal 2: Start the AI Knowledge Base (RAG)**
 ```bash
 cd backend/rag_path
-
-# First run only — ingest historical ticket data into ChromaDB
-python ingest_data.py
-
-# Start the RAG API
 uvicorn app:app --port 8002 --reload
-# → Serving on http://localhost:8002
-# You will see either:
-#   [LLM] ✅ Ollama Cloud — Qwen 3.5
-#   [LLM] ✅ Groq fallback — Llama 3.3 70B
+# → RAG Serving on http://localhost:8002
 ```
 
-**Terminal 3 — Frontend** *(Same for all OS)*
+**Terminal 3: Start the Web Dashboard**
 ```bash
 cd frontend
 npm run dev
 # → Dashboard at http://localhost:3000
 ```
 
-Navigate to `http://localhost:3000` — you will be redirected to the login page.
+That's it! 🎉 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
@@ -239,7 +204,7 @@ All accounts use password **`12345`**.
 | **Delete Ticket** | Permanently remove a ticket with load adjustment on the assigned agent |
 | **Insights Dashboard** | Live resolution rate, total tickets, active employees, AI telemetry gauges |
 | **Employee Directory** | Real-time availability, skill level, expertise tags, and current load per agent |
-| **Messaging** | Direct chat with any IT employee |
+| **Universal Messaging** | WhatsApp-style chat interface to directly message any User or Employee, with real-time unread counts and smart sorting |
 
 ### Employee Portal
 
@@ -248,7 +213,7 @@ All accounts use password **`12345`**.
 | **Resolve** | Full chat interface for working on active tickets; one-click "Resolve" that auto-saves resolution notes |
 | **History** | All resolved tickets with resolution notes |
 | **Profile** | Expertise tags, skill level, and ticket performance stats |
-| **Messaging** | Peer-to-peer internal messaging |
+| **Internal & User Messaging** | Real-time chat with fellow IT staff or ticket authors. Unread threads jump to the top automatically with toast popups |
 
 ### User Portal
 
@@ -256,7 +221,7 @@ All accounts use password **`12345`**.
 |---|---|
 | **AI Support** | Chat-based assistant; classifies the issue and routes through the pipeline automatically |
 | **Dashboard** | Quick overview of open/resolved tickets with a one-click "New Request" button |
-| **Messaging** | Direct chat with the assigned IT agent (agent card auto-appears when assigned, auto-disappears when resolved) |
+| **Direct IT Messaging** | WhatsApp-style messaging to chat directly with assigned IT agents. Real-time popup notifications and unread badges |
 | **History** | Full ticket tracking with **"Solved By"** attribution — N8n / RAG Agent / Employee Name |
 
 ---
