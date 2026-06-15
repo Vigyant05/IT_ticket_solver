@@ -26,8 +26,11 @@ export async function fetchAIMetrics(hloDays: number = 30) {
   return response.json();
 }
 
-export async function fetchEmployees() {
-  const response = await fetch(`${API_BASE}/api/admin/employees`, {
+export async function fetchEmployees(includeUsers: boolean = false) {
+  const url = includeUsers 
+    ? `${API_BASE}/api/admin/employees?include_users=true`
+    : `${API_BASE}/api/admin/employees`;
+  const response = await fetch(url, {
     headers: getAuthHeaders(),
   });
   if (!response.ok) throw new Error('Failed to fetch employees');
@@ -42,8 +45,11 @@ export async function fetchAllTickets() {
   return response.json();
 }
 
-export async function fetchAllEmployees() {
-  const response = await fetch(`${API_BASE}/api/admin/employees`, {
+export async function fetchAllEmployees(includeUsers: boolean = false) {
+  const url = includeUsers 
+    ? `${API_BASE}/api/admin/employees?include_users=true`
+    : `${API_BASE}/api/admin/employees`;
+  const response = await fetch(url, {
     headers: getAuthHeaders(),
   });
   if (!response.ok) throw new Error('Failed to fetch employees');
@@ -110,6 +116,16 @@ export async function sendMessage(data: { ticket_id?: number | string; sender_id
     body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error('Failed to send message');
+  return response.json();
+}
+
+export async function markMessagesRead(data: { sender_id: string; receiver_id: string }) {
+  const response = await fetch(`${API_BASE}/api/messages/read`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to mark messages read');
   return response.json();
 }
 

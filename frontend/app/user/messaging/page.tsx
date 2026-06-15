@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@app/auth/AuthContext';
 import { ProtectedRoute } from '@app/auth/ProtectedRoute';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchUserTickets, fetchMessages, sendMessage, fetchTicket } from '@lib/api';
+import { fetchUserTickets, fetchMessages, sendMessage, markMessagesRead } from '@lib/api';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { 
   Search, 
   MessageSquare, 
@@ -36,6 +37,8 @@ function MessagingPageContent() {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const myId = `User:${user?.id}`;
+
   // Fetch all user tickets to find assigned employees
   const { data: tickets = [], isLoading: isLoadingTickets, refetch } = useQuery({
     queryKey: ['user-tickets', user?.id],
@@ -45,8 +48,16 @@ function MessagingPageContent() {
     refetchOnMount: 'always'
   });
 
+  // Fetch all messages for the user to determine unread counts across all tickets
+  const { data: allMessages = [] } = useQuery({
+    queryKey: ['messages', 'user', myId],
+    queryFn: () => fetchMessages({ user1: myId }),
+    enabled: !!user,
+    refetchInterval: 3000,
+  });
+
   // Filter for tickets with assigned agents that are not yet resolved
-  const activeConversations = tickets.filter((t: any) => {
+  const rawActiveConversations = tickets.filter((t: any) => {
     const status = (t.status || '').toLowerCase();
     const hasAgent = !!t.assigned_employee_id || (!!t.assigned_agent_name && t.assigned_agent_name !== "Unassigned");
     return (
@@ -55,6 +66,23 @@ function MessagingPageContent() {
       status !== 'closed' &&
       hasAgent
     );
+  });
+
+  const activeConversations = rawActiveConversations.map((t: any) => {
+    const employeeId = `Employee:${t.assigned_employee_id}`;
+    const ticketMessages = allMessages.filter((m: any) => m.ticket_id === t.id || m.sender_id === employeeId || m.receiver_id === employeeId);
+    const unreadCount = ticketMessages.filter((m: any) => m.sender_id === employeeId && !m.is_read && m.receiver_id === myId).length;
+    const lastMsg = ticketMessages.length > 0 ? ticketMessages[ticketMessages.length - 1] : null;
+    return {
+       ...t,
+       unreadCount,
+       lastMessageTime: lastMsg ? new Date(lastMsg.timestamp).getTime() : 0,
+       lastMessageText: lastMsg ? lastMsg.content : null
+    };
+  }).sort((a: any, b: any) => {
+    if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+    if (b.unreadCount > 0 && a.unreadCount === 0) return 1;
+    return b.lastMessageTime - a.lastMessageTime;
   });
 
   // Auto-select ticket from URL if present
@@ -68,18 +96,44 @@ function MessagingPageContent() {
       // Auto-select first active conversation if none selected
       setSelectedTicket(activeConversations[0]);
     }
-  }, [ticketIdParam, tickets, activeConversations.length]);
+  }, [ticketIdParam, tickets, activeConversations.length, selectedTicket]);
 
-  // Fetch messages for selected ticket
-  const { data: messages = [], isLoading: isLoadingMessages } = useQuery({
-    queryKey: ['messages', 'ticket', selectedTicket?.id],
-    queryFn: () => fetchMessages({ ticket_id: selectedTicket?.id }),
-    enabled: !!selectedTicket,
-    refetchInterval: 3000, // Poll every 3 seconds
-  });
+
+  // Track previous messages to show toasts
+  const prevMessagesLengthRef = useRef(allMessages.length);
+  useEffect(() => {
+    if (allMessages.length > prevMessagesLengthRef.current) {
+      const newMessages = allMessages.slice(prevMessagesLengthRef.current);
+      newMessages.forEach((msg: any) => {
+        if (msg.sender_id !== myId && !msg.is_read) {
+          toast(`New message from ${msg.sender_name}`, {
+            description: msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content,
+            position: 'top-right'
+          });
+        }
+      });
+    }
+    prevMessagesLengthRef.current = allMessages.length;
+  }, [allMessages, myId]);
+
+  // Messages for currently selected ticket
+  const messages = selectedTicket 
+    ? allMessages.filter((m: any) => m.ticket_id === selectedTicket.id || m.sender_id === `Employee:${selectedTicket.assigned_employee_id}` || m.receiver_id === `Employee:${selectedTicket.assigned_employee_id}`)
+    : [];
+
+  useEffect(() => {
+    if (selectedTicket && messages.length > 0) {
+      const employeeId = `Employee:${selectedTicket.assigned_employee_id}`;
+      const hasUnread = messages.some((m: any) => m.sender_id === employeeId && !m.is_read);
+      if (hasUnread) {
+        markMessagesRead({ sender_id: employeeId, receiver_id: myId }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['messages'] });
+        }).catch(console.error);
+      }
+    }
+  }, [selectedTicket, messages, myId, queryClient]);
 
   // Send message mutation
-  const myId = `User:${user?.id}`;
   const { mutate: sendMsg, isPending: isSending } = useMutation({
     mutationFn: (content: string) => sendMessage({
       ticket_id: selectedTicket.id,
@@ -90,7 +144,7 @@ function MessagingPageContent() {
     }),
     onSuccess: () => {
       setInput('');
-      queryClient.invalidateQueries({ queryKey: ['messages', 'ticket', selectedTicket?.id] });
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     }
   });
 
@@ -153,32 +207,45 @@ function MessagingPageContent() {
               <p className="text-[10px] text-[#a0a5b5]">Wait for an IT specialist to pick up your complex requests.</p>
             </div>
           ) : (
-            activeConversations.map((ticket: any) => (
-              <button
-                key={ticket.id}
-                onClick={() => setSelectedTicket(ticket)}
-                className={cn(
-                  "w-full p-4 flex items-center gap-4 hover:bg-[#f8f7f9] dark:hover:bg-white/[0.02] transition-all border-l-4",
-                  selectedTicket?.id === ticket.id 
-                    ? "bg-primary/5 dark:bg-primary/10 border-primary" 
-                    : "border-transparent"
-                )}
-              >
-                <div className="relative shrink-0">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-lg">
-                    {ticket.assigned_agent_name?.charAt(0) || 'E'}
+            activeConversations.map((ticket: any) => {
+              const employeeId = `Employee:${ticket.assigned_employee_id}`;
+              const ticketMessages = allMessages.filter((m: any) => m.ticket_id === ticket.id || m.sender_id === employeeId || m.receiver_id === employeeId);
+              const unreadCount = ticketMessages.filter((m: any) => m.sender_id === employeeId && !m.is_read).length;
+
+              return (
+                <button
+                  key={ticket.id}
+                  onClick={() => setSelectedTicket(ticket)}
+                  className={cn(
+                    "w-full p-4 flex items-center gap-4 hover:bg-[#f8f7f9] dark:hover:bg-white/[0.02] transition-all border-l-4",
+                    selectedTicket?.id === ticket.id 
+                      ? "bg-primary/5 dark:bg-primary/10 border-primary" 
+                      : "border-transparent"
+                  )}
+                >
+                  <div className="relative shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-lg">
+                      {ticket.assigned_agent_name?.charAt(0) || 'E'}
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1a1b24]" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1a1b24]" />
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-sm font-bold dark:text-[#f5f6fa] truncate">{ticket.assigned_agent_name}</p>
-                    <span className="text-[10px] text-[#a0a5b5] font-medium">#{ticket.id}</span>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="text-sm font-bold dark:text-[#f5f6fa] truncate">{ticket.assigned_agent_name}</p>
+                      <span className="text-[10px] text-[#a0a5b5] font-medium">#{ticket.id}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="text-[11px] text-[#a0a5b5] truncate font-medium max-w-[140px]">{ticket.title}</p>
+                      {unreadCount > 0 && (
+                        <span className="bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-[11px] text-[#a0a5b5] truncate font-medium">{ticket.title}</p>
-                </div>
-              </button>
-            ))
+                </button>
+              );
+            })
           )}
         </div>
       </div>
@@ -221,11 +288,7 @@ function MessagingPageContent() {
               ref={scrollRef}
               className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide"
             >
-              {isLoadingMessages ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="animate-spin text-primary/30" size={32} />
-                </div>
-              ) : messages.length === 0 ? (
+              {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30 mb-4">
                     <MessageSquare size={32} />

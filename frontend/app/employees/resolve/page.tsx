@@ -73,7 +73,7 @@ function ResolvePageContent() {
          if (activeContact.type === 'Admin') {
             payload.receiver_id = 'Admin';
          } else {
-            payload.receiver_id = 'User';
+            payload.receiver_id = activeContact.id;
             payload.ticket_id = activeContact.ticketId;
          }
          return sendMessage(payload);

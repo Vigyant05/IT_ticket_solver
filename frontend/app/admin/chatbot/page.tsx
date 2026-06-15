@@ -3,7 +3,7 @@
 import { Search, Bell, Settings, Send, Paperclip, Database, User, Bot, Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '@app/auth/ProtectedRoute';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchEmployees, fetchMessages, sendMessage } from '@lib/api';
+import { fetchEmployees, fetchMessages, sendMessage, markMessagesRead } from '@lib/api';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@app/auth/AuthContext';
 import { toast } from 'sonner';
@@ -17,8 +17,8 @@ function ChatbotContent() {
    const scrollRef = useRef<HTMLDivElement>(null);
 
    const { data: employees = [], isLoading: isLoadingEmployees } = useQuery({
-      queryKey: ['admin-employees'],
-      queryFn: fetchEmployees
+      queryKey: ['admin-employees', 'with-users'],
+      queryFn: () => fetchEmployees(true)
    });
 
    // Fetch all messages involving Admin
@@ -30,26 +30,32 @@ function ChatbotContent() {
 
    // Derive messages for active contact
    const messages = activeContact 
-      ? allMessages.filter((m: any) => m.sender_id === `Employee:${activeContact.id}` || m.receiver_id === `Employee:${activeContact.id}`)
+      ? allMessages.filter((m: any) => m.sender_id === activeContact.idStr || m.receiver_id === activeContact.idStr)
       : [];
 
-   // Compute Inbox contacts sorted by most recent message
+   // Compute Inbox contacts sorted by unread count then most recent message
    const inboxContacts = [...employees].map((emp: any) => {
-      const empId = `Employee:${emp.id}`;
+      const empId = emp.role === 'User' ? `User:${emp.id}` : `Employee:${emp.id}`;
       const threadMsgs = allMessages.filter((m: any) => m.sender_id === empId || m.receiver_id === empId);
       const lastMsg = threadMsgs.length > 0 ? threadMsgs[threadMsgs.length - 1] : null;
+      const unreadCount = threadMsgs.filter((m: any) => m.sender_id === empId && !m.is_read).length;
       return {
          ...emp,
+         idStr: empId,
          lastMessageTime: lastMsg ? new Date(lastMsg.timestamp).getTime() : 0,
          lastMessageText: lastMsg ? lastMsg.content : null,
-         messageCount: threadMsgs.length
+         unreadCount: unreadCount
       };
-   }).sort((a: any, b: any) => b.lastMessageTime - a.lastMessageTime);
+   }).sort((a: any, b: any) => {
+      if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+      if (b.unreadCount > 0 && a.unreadCount === 0) return 1;
+      return b.lastMessageTime - a.lastMessageTime;
+   });
 
    const { mutate: sendMsg, isPending } = useMutation({
       mutationFn: (content: string) => sendMessage({
          sender_id: 'Admin',
-         receiver_id: `Employee:${activeContact.id}`,
+         receiver_id: activeContact.idStr,
          sender_name: user?.name || 'Admin',
          content
       }),
@@ -59,6 +65,17 @@ function ChatbotContent() {
       },
       onError: () => toast.error('Failed to send message')
    });
+
+   useEffect(() => {
+      if (activeContact && messages.length > 0) {
+         const hasUnread = messages.some((m: any) => m.sender_id === activeContact.idStr && !m.is_read);
+         if (hasUnread) {
+            markMessagesRead({ sender_id: activeContact.idStr, receiver_id: 'Admin' }).then(() => {
+               queryClient.invalidateQueries({ queryKey: ['messages'] });
+            }).catch(console.error);
+         }
+      }
+   }, [activeContact, messages, queryClient]);
 
    useEffect(() => {
       if (scrollRef.current) {
@@ -213,19 +230,19 @@ function ChatbotContent() {
                                     </span>
                                  )}
                               </div>
-                              <div className="flex justify-between items-center">
-                                 <p className="text-[11px] text-[#5f5f62] dark:text-[#a0a5b5] truncate max-w-[160px]">
-                                    {emp.lastMessageText || emp.team}
-                                 </p>
-                                 {emp.messageCount > 0 && (
-                                    <span className="bg-primary dark:bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
-                                       {emp.messageCount}
-                                    </span>
-                                 )}
+                                 <div className="flex justify-between items-center">
+                                    <p className="text-[11px] text-[#5f5f62] dark:text-[#a0a5b5] truncate max-w-[160px]">
+                                       {emp.lastMessageText || emp.team}
+                                    </p>
+                                    {emp.unreadCount > 0 && (
+                                       <span className="bg-blue-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full ml-2 leading-none min-w-[20px] text-center">
+                                          {emp.unreadCount}
+                                       </span>
+                                    )}
+                                 </div>
                               </div>
                            </div>
                         </div>
-                     </div>
                   ))}
                </div>
             </div>

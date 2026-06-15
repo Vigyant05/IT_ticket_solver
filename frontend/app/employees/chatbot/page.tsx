@@ -3,7 +3,7 @@
 import { Search, Send, Paperclip, Bot, Loader2, User as UserIcon } from 'lucide-react';
 import { ProtectedRoute } from '@app/auth/ProtectedRoute';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchEmployees, fetchMessages, sendMessage } from '@lib/api';
+import { fetchEmployees, fetchMessages, sendMessage, markMessagesRead } from '@lib/api';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@app/auth/AuthContext';
 import { toast } from 'sonner';
@@ -19,8 +19,8 @@ function EmployeeChatbotContent() {
    const myId = `Employee:${user?.id}`;
 
    const { data: employees = [], isLoading: isLoadingEmployees } = useQuery({
-      queryKey: ['admin-employees'],
-      queryFn: fetchEmployees
+      queryKey: ['admin-employees', 'with-users'],
+      queryFn: () => fetchEmployees(true)
    });
 
    // Fetch all messages involving this employee
@@ -30,6 +30,23 @@ function EmployeeChatbotContent() {
       refetchInterval: 3000 // Poll for new messages every 3s
    });
 
+   // Track previous messages to show toasts
+   const prevMessagesLengthRef = useRef(allMessages.length);
+   useEffect(() => {
+      if (allMessages.length > prevMessagesLengthRef.current) {
+         const newMessages = allMessages.slice(prevMessagesLengthRef.current);
+         newMessages.forEach((msg: any) => {
+            if (msg.sender_id !== myId && !msg.is_read) {
+               toast(`New message from ${msg.sender_name}`, {
+                  description: msg.content.length > 50 ? msg.content.substring(0, 50) + '...' : msg.content,
+                  position: 'top-right'
+               });
+            }
+         });
+      }
+      prevMessagesLengthRef.current = allMessages.length;
+   }, [allMessages, myId]);
+
    // Derive messages for active contact
    const messages = activeContact 
       ? allMessages.filter((m: any) => m.sender_id === activeContact.id || m.receiver_id === activeContact.id)
@@ -38,21 +55,22 @@ function EmployeeChatbotContent() {
    // Compute Inbox contacts sorted by most recent message
    const allContacts = [
       { id: 'Admin', name: 'Admin_System', role: 'System Administrator' },
-      ...employees.filter((e: any) => e.id !== user?.id).map((e: any) => ({
-         id: `Employee:${e.id}`,
+      ...employees.filter((e: any) => e.id.toString() !== user?.id?.toString() && e.role !== 'Admin').map((e: any) => ({
+         id: e.role === 'User' ? `User:${e.id}` : `Employee:${e.id}`,
          name: e.name,
-         role: e.team
+         role: e.role === 'User' ? 'User' : e.team
       }))
    ];
 
    const inboxContacts = allContacts.map((contact: any) => {
       const threadMsgs = allMessages.filter((m: any) => m.sender_id === contact.id || m.receiver_id === contact.id);
       const lastMsg = threadMsgs.length > 0 ? threadMsgs[threadMsgs.length - 1] : null;
+      const unreadCount = threadMsgs.filter((m: any) => m.sender_id === contact.id && !m.is_read).length;
       return {
          ...contact,
          lastMessageTime: lastMsg ? new Date(lastMsg.timestamp).getTime() : 0,
          lastMessageText: lastMsg ? lastMsg.content : null,
-         messageCount: threadMsgs.length
+         unreadCount
       };
    }).sort((a: any, b: any) => b.lastMessageTime - a.lastMessageTime);
 
@@ -75,6 +93,17 @@ function EmployeeChatbotContent() {
          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
    }, [messages]);
+
+   useEffect(() => {
+      if (activeContact && messages.length > 0) {
+         const hasUnread = messages.some((m: any) => m.sender_id === activeContact.id && !m.is_read);
+         if (hasUnread) {
+            markMessagesRead({ sender_id: activeContact.id, receiver_id: myId }).then(() => {
+               queryClient.invalidateQueries({ queryKey: ['messages'] });
+            }).catch(console.error);
+         }
+      }
+   }, [activeContact, messages, myId, queryClient]);
 
    const handleSend = () => {
       if (!messageInput.trim() || !activeContact) return;
@@ -170,7 +199,7 @@ function EmployeeChatbotContent() {
                   {/* Right Sidebar - Contacts */}
                   <div className="w-[300px] shrink-0 flex flex-col h-full bg-transparent">
                      <div className="flex items-center justify-between mb-4 px-1 shrink-0">
-                        <h3 className="font-bold text-[11px] tracking-widest uppercase text-[#5f5f62] dark:text-[#a0a5b5]">Inbox Contacts</h3>
+                        <h3 className="font-bold text-[11px] tracking-widest uppercase text-[#5f5f62] dark:text-[#a0a5b5]">Directory Contacts</h3>
                      </div>
 
                      <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide pb-4">
@@ -202,9 +231,9 @@ function EmployeeChatbotContent() {
                                        <p className="text-[11px] text-[#5f5f62] dark:text-[#a0a5b5] truncate max-w-[160px]">
                                           {contact.lastMessageText || contact.role}
                                        </p>
-                                       {contact.messageCount > 0 && (
+                                       {contact.unreadCount > 0 && (
                                           <span className="bg-primary dark:bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2">
-                                             {contact.messageCount}
+                                             {contact.unreadCount}
                                           </span>
                                        )}
                                     </div>

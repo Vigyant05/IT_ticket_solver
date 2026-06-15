@@ -62,3 +62,4 @@ class ChatMessage(Base):
     sender_name = Column(String, nullable=False)
     content = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+    is_read = Column(Boolean, default=False)

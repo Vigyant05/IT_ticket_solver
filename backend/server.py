@@ -558,12 +558,12 @@ def get_all_tickets(db: Session = Depends(get_db)):
 
 
 @app.get("/api/admin/employees")
-def get_all_employees(db: Session = Depends(get_db)):
-    """Staff directory (excludes Users and Admin)."""
-    employees = db.query(models.Employee).filter(
-        models.Employee.role != "User",
-        models.Employee.role != "Admin",
-    ).all()
+def get_all_employees(include_users: bool = False, db: Session = Depends(get_db)):
+    """Staff directory (excludes Admin, optionally includes Users)."""
+    query = db.query(models.Employee).filter(models.Employee.role != "Admin")
+    if not include_users:
+        query = query.filter(models.Employee.role != "User")
+    employees = query.all()
     return [
         {
             "id": e.id,
@@ -859,9 +859,24 @@ def get_messages(
             "sender_name": m.sender_name,
             "content": m.content,
             "timestamp": m.timestamp.isoformat(),
-            "ticket_id": m.ticket_id
+            "ticket_id": m.ticket_id,
+            "is_read": m.is_read
         } for m in messages
     ]
+
+class ReadMessagesRequest(BaseModel):
+    sender_id: str
+    receiver_id: str
+
+@app.post("/api/messages/read")
+def mark_messages_read(req: ReadMessagesRequest, db: Session = Depends(get_db)):
+    db.query(models.ChatMessage).filter(
+        models.ChatMessage.sender_id == req.sender_id,
+        models.ChatMessage.receiver_id == req.receiver_id,
+        models.ChatMessage.is_read == False
+    ).update({"is_read": True})
+    db.commit()
+    return {"status": "ok"}
 
 
 # ===========================================================================
